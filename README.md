@@ -1,8 +1,9 @@
 ![mit](https://img.shields.io/badge/License-MIT-blue.svg)
 
-# Study title
-
- Authors
+# Biased and Inattentive Responding Drive Apparent Metacognitive Biases in Mental Health 
+ Noam Sarna1, Reuven Dar1, & Matan Mazor2
+1 School of Psychological Sciences, Tel Aviv University
+2 All Souls College and Department of Experimental Psychology, University of Oxford
 
  ## Data
 
