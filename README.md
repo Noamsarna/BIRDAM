@@ -1,7 +1,7 @@
 ![mit](https://img.shields.io/badge/License-MIT-blue.svg)
 
 # Biased and Inattentive Responding Drive Apparent Metacognitive Biases in Mental Health 
-## Noam Sarna, Matan Mazor, and Reuvan Dar 
+## Noam Sarna, Reuvan Dar, and Matan Mazor 
 
 ## Data 
 Fully-anonymized experimental data is available
