@@ -176,13 +176,13 @@ var consentForm = {
 
 
         '<h2> Perceptual Task Instructions </h2>' +
-        '<p> After the dots disappear, you will decide which box contained more dots. Use the "S" (left) and "F" (right) keys to make your decision. Your decision will be highlighted.</p>',
+        '<p> After the dots disappear, you will decide which box contained more dots. Use the 'S' (left) and 'F' (right) keys to make your decision. Your decision will be highlighted.</p>',
 
         '<h2> Confidence Rating </h2>' +
         '<p> After making your perceptual decision, a confidence rating scale will appear. You will rate your confidence in this decision on a scale from "Guessing" to "Certainly correct". Use your cursor to adjust your confidence level and click the mouse left key to submit your choice.</p>',
 
         '<h2> Practice Trials </h2>' +
-        '<p> You will now complete 25 practice trials to become familiar with the task. Remember - use the "S" (left) and "F" (right) keys to make your decision. </p>',
+        '<p> You will now complete 25 practice trials to become familiar with the task. Remember - use the 'S' (left) and 'F' (right) keys to make your decision. </p>',
       ],
       show_clickable_nav: true,
       key_forward: 'space'
@@ -375,7 +375,7 @@ window.onload = function() {
     timeline = makeTimeline();
     
     // Initialize jsPsych
-    initJsPsych({
+    jsPsych.init({
         preload_images: images,
         timeline: timeline,
         on_finish: function() {
