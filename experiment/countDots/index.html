@@ -3,7 +3,7 @@
 
 <head>
   <title>Count Dots</title>
-  <script src="jatos.js"></script>
+  <!-- Removed JATOS script -->
   <script src="jspsych/jspsych.js"></script>
   <script src="p5/p5.min.js"></script>
   <script src="jspsych/plugin-fullscreen.js"></script>
@@ -29,19 +29,28 @@
   const jsPsych = initJsPsych({
     preload_images: images,
     on_finish: function () {
-        // Add the URL parameters to the data file
-        jsPsych.data.addProperties(jatos.urlQueryParameters);
-        var resultCsv = jsPsych.data.get().csv();
-        jatos.submitResultData(resultCsv, function() {
-            
-            // Get  URL parameters from the current session
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            // Qualtrics redirect URL with the parameters
-            const baseQualtricsURL = 'https://socialtau.qualtrics.com/jfe/form/SV_6YyFMiFzES7S6nY';
-            const redirectURL = `${baseQualtricsURL}?${urlParams.toString()}`;            
-            jatos.endStudyAndRedirect(redirectURL, true, "participant_redirected_to_qualtrics");
-        });
+        // Changed end experiment behavior
+        var resultData = jsPsych.data.get().csv();
+        
+        // Save data to a downloadable file when experiment is complete
+        var blob = new Blob([resultData], {type: 'text/csv'});
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'experiment_data.csv';
+        
+        // Create a completion message with download button
+        document.body.innerHTML = `
+            <div style="text-align: center; padding: 50px; font-family: 'Quicksand', sans-serif;">
+                <h1>Experiment Complete</h1>
+                <p>Thank you for participating in our experiment.</p>
+                <p>Click the button below to download your data.</p>
+                <button id="download-btn" style="padding: 10px 20px; margin-top: 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">Download Data</button>
+            </div>
+        `;
+        
+        document.getElementById('download-btn').onclick = function() {
+            a.click();
+        };
     }
 });
 
@@ -166,8 +175,6 @@ var consentForm = {
     choices: ['Consent', 'Do Not Consent'],
     data: { task: 'consent' },
     on_finish: function(data) {
-        //console.log('Consent data:', data); // Check the data object for response
-
         if (data.response === 1) {
             // The participant selected "Do Not Consent"
             const message = 'You have chosen not to participate. Thank you for your time.';
@@ -176,7 +183,6 @@ var consentForm = {
             // duration for how long the message is displayed 
             setTimeout(function() {
                 jsPsych.endExperiment(message);
-                jatos.endStudy(true, "did not consent");
             }, 4000); // display message for 4 seconds
         }
     }
@@ -190,18 +196,18 @@ var consentForm = {
         '<p> In this task, you will see two boxes on the screen for a brief period of time. Each box will contain a number of dots. Your task is to determine which box contains more dots.</p>',
           
         '<h2> Perceptual Task Instructions </h2>' +
-        '<p> At the beginning of each trial, you will see a ‘+’ sign in the center of the screen for one second. Focus your gaze on this sign. Then two black boxes containing black dots will briefly appear on the screen.</p>' +
+        '<p> At the beginning of each trial, you will see a '+' sign in the center of the screen for one second. Focus your gaze on this sign. Then two black boxes containing black dots will briefly appear on the screen.</p>' +
         '<img src="images/example_trial.png" alt="Example of perceptual task" width="400">',
 
 
         '<h2> Perceptual Task Instructions </h2>' +
-        '<p> After the dots disappear, you will decide which box contained more dots. Use the ‘S’ (left) and ‘F’ (right) keys to make your decision. Your decision will be highlighted.</p>',
+        '<p> After the dots disappear, you will decide which box contained more dots. Use the 'S' (left) and 'F' (right) keys to make your decision. Your decision will be highlighted.</p>',
 
         '<h2> Confidence Rating </h2>' +
         '<p> After making your perceptual decision, a confidence rating scale will appear. You will rate your confidence in this decision on a scale from "Guessing" to "Certainly correct". Use your cursor to adjust your confidence level and click the mouse left key to submit your choice.</p>',
 
         '<h2> Practice Trials </h2>' +
-        '<p> You will now complete 25 practice trials to become familiar with the task. Remember - use the ‘S’ (left) and ‘F’ (right) keys to make your decision. </p>',
+        '<p> You will now complete 25 practice trials to become familiar with the task. Remember - use the 'S' (left) and 'F' (right) keys to make your decision. </p>',
       ],
       show_clickable_nav: true,
       key_forward: 'space'
@@ -213,7 +219,7 @@ let incorrect_responses = false;
 // 3. Define individual trials 
 var confidence_correct_judgment = {
   type: jsPsychHtmlSliderResponse,
-  stimulus: "<p>If you are certain you made the correct judgment, where on the scale would you place your confidence from 50% ‘Guessing’ to 100% ‘Certainly correct’?</p>",
+  stimulus: "<p>If you are certain you made the correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?</p>",
   labels: ['<span style="font-size: 20px;">Guessing</span>', '<span style="font-size: 20px;">Certainly correct</span>'],
   min: 1,
   max: 100,
@@ -230,7 +236,7 @@ var confidence_correct_judgment = {
 
 var confidence_mistake_judgment = {
   type: jsPsychHtmlSliderResponse,
-  stimulus: "<p>If you are completely unsure whether you made a correct judgment, where on the scale would you place your confidence from 50% ‘Guessing’ to 100% ‘Certainly correct’?</p>",
+  stimulus: "<p>If you are completely unsure whether you made a correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?</p>",
   labels: ['<span style="font-size: 20px;">Guessing</span>', '<span style="font-size: 20px;">Certainly correct</span>'],
   min: 1,
   max: 100,
@@ -354,7 +360,7 @@ var fourth_block_instructions = {
 
 var final_page = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: "<h2>Please press any key to continue to the next part.</p>"
+  stimulus: "<h2>Thank you for participating!</h2><p>The experiment is now complete.</p>"
 };
 
     //set up the timeline of the expeirment 
@@ -387,27 +393,31 @@ var final_page = {
 
 
 /* start the experiment */    
-jatos.onLoad(function () {
-      var m = new MersenneTwister();
-      Math.random = function() {return m.random()};
-      var protocol_sum = jatos.batchSession.get("protocol_sum");
-      console.log(protocol_sum);
-      var subject_identifier = jatos.workerId;
-      subject_sum = hexToBytes(
-        CryptoJS.SHA256(
-          protocol_sum+subject_identifier).toString()
-        );
-      m.init_by_array(subject_sum, subject_sum.length);
-      jsPsych.data.addProperties({'protocol_sum':protocol_sum,
-      'subject_identifier':subject_identifier, 'subject_sum':subject_sum});
-      timeline=makeTimeline();
-      jsPsych.run(timeline);
+// Removed JATOS onLoad and replaced with direct experiment initialization
+window.onload = function() {
+    var m = new MersenneTwister();
+    Math.random = function() {return m.random()};
+    
+    // Generate a random protocol sum instead of getting it from JATOS
+    var protocol_sum = CryptoJS.SHA256(Date.now().toString()).toString();
+    
+    // Generate a random subject identifier
+    var subject_identifier = 'participant_' + Math.floor(Math.random() * 10000);
+    
+    subject_sum = hexToBytes(
+        CryptoJS.SHA256(protocol_sum + subject_identifier).toString()
+    );
+    
+    m.init_by_array(subject_sum, subject_sum.length);
+    
+    jsPsych.data.addProperties({
+        'protocol_sum': protocol_sum,
+        'subject_identifier': subject_identifier, 
+        'subject_sum': subject_sum
     });
-
-
-
-  
-
+    
+    timeline = makeTimeline();
+    jsPsych.run(timeline);
+};
 </script>
-
 </html>
