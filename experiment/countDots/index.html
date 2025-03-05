@@ -3,7 +3,6 @@
 
 <head>
   <title>Count Dots</title>
-  <!-- Removed JATOS script -->
   <script src="jspsych/jspsych.js"></script>
   <script src="p5/p5.min.js"></script>
   <script src="jspsych/plugin-fullscreen.js"></script>
@@ -14,7 +13,7 @@
   <script src="jspsych/plugin-html-keyboard-response.js"></script>
   <script src="jspsych/plugin-instructions.js"></script>
   <script src="mersenne-twister.js"></script>
-  <script src="crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Corben&family=Quicksand&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet" type="text/css">
   </link>
@@ -27,31 +26,7 @@
   var images = ['images/example_trial.png'];
 
   const jsPsych = initJsPsych({
-    preload_images: images,
-    on_finish: function () {
-        // Changed end experiment behavior
-        var resultData = jsPsych.data.get().csv();
-        
-        // Save data to a downloadable file when experiment is complete
-        var blob = new Blob([resultData], {type: 'text/csv'});
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'experiment_data.csv';
-        
-        // Create a completion message with download button
-        document.body.innerHTML = `
-            <div style="text-align: center; padding: 50px; font-family: 'Quicksand', sans-serif;">
-                <h1>Experiment Complete</h1>
-                <p>Thank you for participating in our experiment.</p>
-                <p>Click the button below to download your data.</p>
-                <button id="download-btn" style="padding: 10px 20px; margin-top: 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">Download Data</button>
-            </div>
-        `;
-        
-        document.getElementById('download-btn').onclick = function() {
-            a.click();
-        };
-    }
+    preload_images: images
 });
 
 
@@ -385,6 +360,7 @@ var final_page = {
     return timeline
   }
 
+  // We'll keep this function but we won't need to use it since we simplified initialization
   function hexToBytes(hex) {
     for (var bytes = [], c = 0; c < hex.length; c += 2)
       bytes.push(parseInt(hex.substr(c, 2), 16));
@@ -393,31 +369,20 @@ var final_page = {
 
 
 /* start the experiment */    
-// Removed JATOS onLoad and replaced with direct experiment initialization
+// Simple direct initialization without JATOS dependencies
 window.onload = function() {
-    var m = new MersenneTwister();
-    Math.random = function() {return m.random()};
-    
-    // Generate a random protocol sum instead of getting it from JATOS
-    var protocol_sum = CryptoJS.SHA256(Date.now().toString()).toString();
-    
-    // Generate a random subject identifier
-    var subject_identifier = 'participant_' + Math.floor(Math.random() * 10000);
-    
-    subject_sum = hexToBytes(
-        CryptoJS.SHA256(protocol_sum + subject_identifier).toString()
-    );
-    
-    m.init_by_array(subject_sum, subject_sum.length);
-    
-    jsPsych.data.addProperties({
-        'protocol_sum': protocol_sum,
-        'subject_identifier': subject_identifier, 
-        'subject_sum': subject_sum
-    });
-    
+    // Create the experiment timeline
     timeline = makeTimeline();
-    jsPsych.run(timeline);
+    
+    // Initialize jsPsych
+    jsPsych.init({
+        preload_images: images,
+        timeline: timeline,
+        on_finish: function() {
+            // Save data to CSV file for download when experiment completes
+            jsPsych.data.get().localSave('csv', 'countdots_data.csv');
+        }
+    });
 };
 </script>
 </html>
