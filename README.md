@@ -7,7 +7,7 @@
 Fully-anonymized experimental data is available [here](https://osf.io/6npd9/files/osfstorage). 
 
 ## Demos 
-You can try the online experiment by clicking [here](https://noamsarna.github.io/BIRDAM/experiment/countDots/). 
+You can try the online experiment by clicking [here](https://noamsarna.github.io/BIRDAM/experiment/countDots/)
 
 ## Analysis Scripts
 A fully reproducible version analysis pipeline in RMD format is available [here](https://github.com/Noamsarna/BIRDAM/blob/main/docs/prePrint.Rmd) 
