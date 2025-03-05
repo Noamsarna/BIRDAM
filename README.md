@@ -17,9 +17,21 @@ To ensure preregistration time-locking (in other words, that preregistration pre
 
 ## Experiment
 
+The experiment was run in two batches due to a minor bug in the experiment code. Therefore, we provide preregistration time-locking summaries for both runs.
+
+### First run
 [protocol folder]
 
 **protocol sum**:
 23aef7ab769eab2870a780b6b5c821e27782d3019b6bca0589aebecde086159e
 
 [**Preregistration document from the protocol folder**]
+
+### Second run 
+[protocol folder]
+
+**protocol sum**:
+13526ddfa7940be0e662cf488341d480b26fbf07b3a0acd5f0f096ea5ac73bae
+
+[**Preregistration document from the protocol folder**]
+
