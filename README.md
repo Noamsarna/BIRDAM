@@ -20,18 +20,18 @@ To ensure preregistration time-locking (in other words, that preregistration pre
 The experiment was run in two batches due to a minor bug in the experiment code. Therefore, we provide preregistration time-locking summaries for both runs.
 
 ### First run
-[protocol folder]
+[protocol folder](https://github.com/Noamsarna/BIRDAM/blob/main/Cryptographic%20pre-registration/First_run_22OCT2024/protocol_folder.zip)
 
 **protocol sum**:
 23aef7ab769eab2870a780b6b5c821e27782d3019b6bca0589aebecde086159e
 
-[**Preregistration document from the protocol folder**]
+[**Preregistration document from the protocol folder**](https://github.com/Noamsarna/BIRDAM/blob/main/Cryptographic%20pre-registration/First_run_22OCT2024/The%20Impact%20of%20Inattentive%20Responding%20on%20Confidence%20Ratings%20OSF%20PR%20document%2022OCT2024.docx)
 
 ### Second run 
-[protocol folder]
+[protocol folder](https://github.com/Noamsarna/BIRDAM/blob/main/Cryptographic%20pre-registration/Second_run_23OCT2024/protocol%20folder.zip)
 
 **protocol sum**:
 13526ddfa7940be0e662cf488341d480b26fbf07b3a0acd5f0f096ea5ac73bae
 
-[**Preregistration document from the protocol folder**]
+[**Preregistration document from the protocol folder**](https://github.com/Noamsarna/BIRDAM/blob/main/Cryptographic%20pre-registration/Second_run_23OCT2024/The%20Impact%20of%20Inattentive%20Responding%20on%20Confidence%20Ratings%20OSF%20PR%20document%2022OCT2024.docx)
 
