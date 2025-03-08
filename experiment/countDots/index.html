@@ -399,8 +399,10 @@ var final_page = {
 //       m.init_by_array(subject_sum, subject_sum.length);
 //       jsPsych.data.addProperties({'protocol_sum':protocol_sum,
 //       'subject_identifier':subject_identifier, 'subject_sum':subject_sum});
-      timeline=makeTimeline();
-      jsPsych.run(timeline);
+document.addEventListener('DOMContentLoaded', function() {
+  timeline = makeTimeline();
+  jsPsych.run(timeline);
+});
     //});
 
 
