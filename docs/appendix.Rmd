@@ -2,14 +2,16 @@
 
 ### Mixed linear model analysis of item reversal effects on item-confidence correlation
 
-In order to control for the possible effect of questionnaire content on the correlation between standard and reversed items with confidence, we performed a linear mixed model predicting item-correlation with confidence from item coding (standard/reversed) with random intercept for questionnaire (correlation ~ reversed + (1|questionnaire)). Results revealed that in both datasets reversed items showed lower correlations with confidence compared to standard items, even when accounting for questionnaire-level variation in the model:  Seow and Gillan, 2020: `r apa_print(conf_cor_reversed_SG2020_m)$full_result$is_reversedreversed`, Rouault et al, 2018: `r apa_print(conf_cor_reversed_R2018_m)$full_result$is_reversedreversed`. We also tested a model allowing the effect of reversal to vary across questionnaires (random slopes), but model diagnostics indicated this model was too complex for the available data.
+In order to control for the possible effect of questionnaire content on the correlation between standard and reversed items with confidence, we performed a linear mixed model predicting item-correlation with confidence from item coding (standard/reversed) with random intercept for questionnaire (correlation ~ reversed + (1|questionnaire)). Results revealed that in both datasets reversed items showed lower correlations with confidence compared to standard items, even when accounting for questionnaire-level variation in the model: Seow and Gillan, 2020: `r apa_print(conf_cor_reversed_SG2020_m)$full_result$is_reversedreversed`, Rouault et al, 2018: `r apa_print(conf_cor_reversed_R2018_m)$full_result$is_reversedreversed`. We also tested a model allowing the effect of reversal to vary across questionnaires (random slopes), but model diagnostics indicated this model was too complex for the available data.
 
-### Within-questionnaire analysis of skewness-confidence correlations
-```{r figure_within_quest_analysis_R2018, echo=FALSE, fig.cap="Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Rouault et al. (2018). Each panel represents a different questionnaire, and each point represents an individual item. The x-axis shows the skewness of item responses. Y-axis shows the correlation between item ratings and confidence across participants. The black line represents the linear fit with 95% confidence intervals (gray shading). Pearson correlation coefficients (R) and corresponding p-values are shown for each questionnaire."}
-knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_R2018.png")
+### Within-questionnaire analysis of skewness-confidence correlations 
+
+```{r within-quest-analysis-R2018, include = TRUE, echo=FALSE, fig.cap="Figure A1 Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Rouault et al. (2018). Each panel represents a different questionnaire, and each point represents an individual item. The x-axis shows the skewness of item responses. Y-axis shows the correlation between item ratings and confidence across participants. The black line represents the linear fit with 95% confidence intervals (gray shading). Pearson correlation coefficients (R) and corresponding p-values are shown for each questionnaire.", fig.lp=""}
+
+knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_R2018.png") 
 ```
 
-```{r figure_within_quest_analysis_SG2020, echo=FALSE, fig.cap="Figure A2 Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Seow and Gillan (2020). The same conventions as in Figure A1 are used."}
+```{r figure_within_quest_analysis_SG2020, include = TRUE, echo=FALSE, fig.cap="Figure A2 Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Seow and Gillan (2020). The same conventions as in Figure A1 are used."}
 knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_SG2020.png")
 ```
 
@@ -37,8 +39,6 @@ figure_R2018_unfiltered <- R2018_items_table %>%
   )
 
 
-#ggsave(filename = "../figures/figure_A1.png", plot = figure_A1, width = 12, height = 8, dpi = 300)
-
 ```
 
 ```{r figure_R2018_unfiltered_fig, fig.cap="Figure A3 Correlation between Item -Level Skewness and Confidence with Extreme Skewed Items Included. Relationship between item-level skewness and item-confidence correlation in Rouault et al., (2018) including full skewness scale. Each point represents an item from the self-report questionnaires, with the shapes indicating different questionnaires and color indicating whether the item was reversed or not. The x-axis represents the skewness score of each item; the y-axis represents the Pearson correlation coefficient between the item’s skewness and mean confidence ratings."}
@@ -50,7 +50,7 @@ We conducted multiple regression analyses to examine the effects of inattentiven
 
 ### Sex differences in inattentive responding
 
-In our sample, the distribution of sex (Male/Female self-reported on Prolific; two participants who did not report their sex were excluded from this analysis) differed between attentive and inattentive participants. Among attentive responders, there was no significant sex difference (Male: n = 69; Female: n = 73), whereas among inattentive participants, males were more frequent (Male: n = 30; Female: n = 16). This effect was only marginally significant in a chi-square test: `r apa_print(chisq_result, n = chi_sqaure__sample_size)$statistic[[1]]`
+In our sample, the distribution of Sex (Male/Female self-reported on Prolific; two participants who did not report their sex were excluded from this analysis) differed between attentive and inattentive participants. Among attentive responders, there was no significant sex difference (Male: n = 69; Female: n = 73), whereas among inattentive participants, males were more frequent (Male: n = 30; Female: n = 16). This effect was only marginally significant in a chi-square test: `r apa_print(chisq_result, n = chi_sqaure__sample_size)$statistic[[1]]`
 
 ```{r sex_differences_inatten, echo=FALSE, fig.cap="Figure A4 – Sex differences in inattentiveness prevalence. "}
 knitr::include_graphics("../figures/sex_differences_inatten_fig.png")
@@ -64,13 +64,13 @@ knitr::include_graphics("../figures/sex_differences_conf_fig.png")
 
 ### Inattentive responders encounter an easier task due to staircasing
 
-As inattentive responders generally perform worse than attentive responders, they encounter an overall easier task difficulty when using a staircase procedure (see Method for details on this procedure). This occurs because more mistakes lead to a reduction in task difficulty. In our experiment, task difficulty was defined as the difference in dots (increment) between two stimuli. The greater the difference, the easier the task, as the distinction between the two squares becomes more apparent. Therefore, we computed difficulty as the negative of the increment:
+As inattentive responders generally perform worse than attentive responders, they encounter an overall easier task difficulty when using a staircase procedure (see Methods for details on this procedure). This occurs because more mistakes lead to a reduction in task difficulty. In our experiment, task difficulty was defined as the difference in dots (increment) between two stimuli. The greater the difference, the easier the task, as the distinction between the two squares becomes more apparent. Therefore, we computed difficulty as the negative of the increment:
 
 $difficulty = -increment$
 
 Higher increments result in easier perceptual decisions. The mean difficulty was then calculated for each participant to assess overall task difficulty. We found that inattentive participants encountered significantly easier task on average compared to attentive participants, `r apa_print(difficulty_t_test)$statistic` (figure A6 left panel). We also found a negative correlation between task difficulty and mean confidence ratings, indicating that as the task became easier, mean confidence increased, `r apa_print(difficulty_confidence_cor)$statistic` (figure A6, right panel).
 
-```{r staircase_figure, echo=FALSE, fig.cap="Figure A4 – Task difficulty and inattentiveness. Left panel: mean difficulty ratings as a function of attentiveness, with data points for attentive and inattentive responses shown in red and blue, respectively. Black markers and error bars represent the mean and standard error, respectively. Right panel: mean confidence as a function of mean difficulty, with attentive and inattentive responses again differentiated by color. A negative correlation is observed, as shown by the black regression line (shaded area represents the confidence interval)."}
+```{r staircase_figure, echo=FALSE, fig.cap="Figure A6 – Task difficulty and inattentiveness. Left panel: mean difficulty ratings as a function of attentiveness, with data points for attentive and inattentive responses shown in red and blue, respectively. Black markers and error bars represent the mean and standard error, respectively. Right panel: mean confidence as a function of mean difficulty, with attentive and inattentive responses again differentiated by color. A negative correlation is observed, as shown by the black regression line (shaded area represents the confidence interval)."}
 knitr::include_graphics("../figures/staircase_conf_fig.png")
 
 ```
@@ -80,15 +80,15 @@ knitr::include_graphics("../figures/staircase_conf_fig.png")
 # stringent comprehension check 
 strict_failed_ids <-  
   raw_df %>%
-  filter(!(PROLIFIC_PID %in% excluded_for_accuracy)) %>%
+  filter(!(subj_id %in% excluded_for_accuracy)) %>%
   filter(trial_type == 'html-slider-response') %>%
-  select(trial_index, PROLIFIC_PID, stimulus, response, test_part) %>%
+  select(trial_index, subj_id, stimulus, response, test_part) %>%
   mutate(response = as.numeric(response),  # Ensure response is numeric
          response_transformed = 0.5 * response + 50) %>%
   filter((test_part == "Confidence_Correct_Judgment" & response_transformed >= 85) |
          (test_part == "Confidence_Mistake_Judgment" & response_transformed <= 65)) %>%
-  distinct(PROLIFIC_PID) %>%  # Keep only unique participants
-  pull(PROLIFIC_PID)
+  distinct(subj_id) %>%  # Keep only unique participants
+  pull(subj_id)
 
 strict_failed_ids_num <- length(strict_failed_ids)
 sample_size_strict <- total_n_after_exclusion - strict_failed_ids_num
@@ -96,20 +96,20 @@ sample_size_strict <- total_n_after_exclusion - strict_failed_ids_num
 #comprehension check 
 lenient_failed_ids <-  
   raw_df %>% filter(trial_type =='html-slider-response') %>% 
-  filter(!(PROLIFIC_PID %in% excluded_for_accuracy)) %>%
-  select(trial_index, PROLIFIC_PID, stimulus, response, test_part) %>% 
-  group_by(PROLIFIC_PID) %>% 
+  filter(!(subj_id %in% excluded_for_accuracy)) %>%
+  select(trial_index, subj_id, stimulus, response, test_part) %>% 
+  group_by(subj_id) %>% 
   summarise(include = response[test_part=='Confidence_Mistake_Judgment']<
     response[test_part=='Confidence_Correct_Judgment'] ) %>% 
   filter(include==FALSE) %>% 
-  pull(PROLIFIC_PID)
+  pull(subj_id)
 
 lenient_failed_ids_num <- length(lenient_failed_ids)
 sample_size_lenient <- total_n_after_exclusion - lenient_failed_ids_num
 
 
 inattentive_t_test_exc_len_df <- mean_conf_df %>%
-   filter(!(PROLIFIC_PID %in% lenient_failed_ids)) %>% 
+   filter(!(subj_id %in% lenient_failed_ids)) %>% 
   select(failed_attention, mean_conf) %>%
   mutate(failed_attention = factor(failed_attention), # Convert to factor
          failed_attention = relevel(failed_attention, ref = "Inattentive")) 
@@ -118,19 +118,15 @@ inattentive_conf_exc_len_t_test <-
 t.test(mean_conf ~ failed_attention, data = inattentive_t_test_exc_len_df, alternative = 'greater')
 
 pearson_test_exc_len <- mean_conf_df %>%
-  filter(!(PROLIFIC_PID %in% lenient_failed_ids)) %>%
+  filter(!(subj_id %in% lenient_failed_ids)) %>%
   with(cor.test(mean_rating, mean_conf, method = "pearson"))
 
 ```
 
 ### Analysis excluding participants that failed the confidence comprehension check
 
-At the end of the perceptual task, participants' comprehension was assessed with two comprehension items (see Methods). Our pre registered plan was not to exclude participants according to these items. However, as an exploratory analysis, we report our main analyses after excluding participants that failed the comprehension items. Initially, we only included participants who gave confidence ratings above 85 in response to the item: "If you are certain you made the correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?" and below 65 in response to the item: "If you are completely unsure whether you made a correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?". Only `r print_num(sample_size_strict)` participant passed these stringent criteria. Instead, we adopted a more lenient criterion, and included all participants who gave higher rating to the first item than to the second item. This resulted in a total of `r print_num(sample_size_lenient)` participants. We then tested our two main hypotheses which remained significant (hypothesis 1: `r apa_print(inattentive_conf_exc_len_t_test )$statistic`, hypothesis 2: `r apa_print(pearson_test_exc_len)$full_result`; Figure A5).
+At the end of the perceptual task, participants' comprehension was assessed with two comprehension items (see Methods). Our pre registered plan was not to exclude participants according to these items. However, as an exploratory analysis, we report our main analyses after excluding participants that failed the comprehension items. Initially, we only included participants who gave confidence ratings above 85 in response to the item: "If you are certain you made the correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?" and below 65 in response to the item: "If you are completely unsure whether you made a correct judgment, where on the scale would you place your confidence from 50% 'Guessing' to 100% 'Certainly correct'?". Only `r print_num(sample_size_strict)` participant passed these stringent criteria. Instead, we adopted a more lenient criterion, and included all participants who gave higher rating to the first item than to the second item. This resulted in a total of `r print_num(sample_size_lenient)` participants. We then tested our two main hypotheses which remained significant (hypothesis 1: `r apa_print(inattentive_conf_exc_len_t_test )$statistic`, hypothesis 2: `r apa_print(pearson_test_exc_len)$full_result`).
 
-```{r figure_A5, echo=FALSE, fig.cap="Figure A5 Mean confidence interactions with inattentiveness, acquiescence and OCI-R scores after excluding participants for comprehension. The same conventions as in Figure 5 are used."}
-knitr::include_graphics("../figures/figure_A5.png")
-
-```
 
 ### A bootstrap permutation test for response style effects on OCI-confidence correlations 
 
@@ -146,9 +142,9 @@ For each of 1,000 iterations, we:
 ```{r acq_null, message=FALSE, warning=FALSE}
 # Create mean_rating_values
 mean_rating_values <- mean_conf_df %>% 
-  group_by(PROLIFIC_PID) %>% 
-  select(PROLIFIC_PID, mean_rating) %>%
-  rename(prolific_id = PROLIFIC_PID)
+  group_by(subj_id) %>% 
+  select(subj_id, mean_rating) %>%
+  rename(subj_id = subj_id)
 
 # Function to compute correlation with random acquiescence and down sampling 
 perform_correction_iterations <- function(items_df, mean_rating_values, mean_conf_df,
@@ -171,23 +167,23 @@ perform_correction_iterations <- function(items_df, mean_rating_values, mean_con
   # Perform iterations
   for(iter in 1:n_iterations) {
     # Randomly select participants for this iteration
-    selected_participants <- sample(unique(mean_rating_values$prolific_id), 
+    selected_participants <- sample(unique(mean_rating_values$subj_id), 
                                     size = n_keep, 
                                     replace = FALSE)
     
     # Filter datasets to include only selected participants for this iteration
     current_mean_rating_values <- mean_rating_values %>%
-      filter(prolific_id %in% selected_participants)
+      filter(subj_id %in% selected_participants)
     
     current_items_df <- items_df %>%
-      filter(prolific_id %in% selected_participants)
+      filter(subj_id %in% selected_participants)
     
     current_mean_conf_df <- mean_conf_df %>%
-      filter(PROLIFIC_PID %in% selected_participants)
+      filter(subj_id %in% selected_participants)
     
     # Create a single random rating assignment for each participant
     participant_ratings <- data.frame(
-      prolific_id = selected_participants,
+      subj_id = selected_participants,
       mean_rating = sample(mean_rating_values$mean_rating, 
                            size = length(selected_participants), 
                            replace = FALSE)
@@ -196,7 +192,7 @@ perform_correction_iterations <- function(items_df, mean_rating_values, mean_con
     # Update mean ratings in items_df for this iteration
     current_oci_items <- current_items_df %>%
       select(-mean_rating) %>%
-      left_join(participant_ratings, by = "prolific_id")
+      left_join(participant_ratings, by = "subj_id")
     
     # Initialize results list for this iteration
     results <- list()
@@ -221,7 +217,7 @@ perform_correction_iterations <- function(items_df, mean_rating_values, mean_con
     
     # Calculate totals per participant
     participant_totals <- iteration_results %>%
-      group_by(prolific_id) %>%
+      group_by(subj_id) %>%
       summarise(
         total_oci = sum(item_value),
         total_oci_corrected = sum(item_corrected)
@@ -234,8 +230,8 @@ perform_correction_iterations <- function(items_df, mean_rating_values, mean_con
     current_results <- current_mean_conf_df %>% # join participant totals with the mean confidence dataframe
       left_join(
         participant_totals %>%
-          rename(PROLIFIC_PID = prolific_id),
-        by = 'PROLIFIC_PID'
+          rename(subj_id = subj_id),
+        by = 'subj_id'
       ) 
     
     # Store correlation coefficient - 
@@ -247,16 +243,16 @@ perform_correction_iterations <- function(items_df, mean_rating_values, mean_con
     
     # Join totals back to the item-level data
     full_iteration_data <- iteration_results %>%
-      left_join(participant_totals, by = "prolific_id") %>%
+      left_join(participant_totals, by = "subj_id") %>%
       # join mean_conf data
       left_join(
         current_mean_conf_df %>% 
-          select(PROLIFIC_PID, mean_conf) %>%
-          rename(prolific_id = PROLIFIC_PID),
-        by = "prolific_id"
+          dplyr::select(subj_id, mean_conf) %>%
+          rename(subj_id = subj_id),
+        by = "subj_id"
       ) %>%
       mutate(iteration = iter) %>% # Adds iteration number
-      select(iteration, prolific_id, item_name, item_value, mean_rating, 
+      dplyr::select(iteration, subj_id, item_name, item_value, mean_rating, 
              item_corrected, total_oci, total_oci_corrected, total_oci_corrected_scaled, mean_conf)
     
     # Store in all_iterations_data
@@ -351,25 +347,25 @@ perform_sds_correction_iterations <- function(items_df, mean_rating_values, mean
   # Perform iterations
   for(iter in 1:n_iterations) {
     # Randomly select participants for this iteration
-    selected_participants <- sample(unique(mean_rating_values$prolific_id),
+    selected_participants <- sample(unique(mean_rating_values$subj_id),
                                     size = n_keep,
                                     replace = FALSE)
     
     # Filter datasets to include only selected participants for this iteration
     current_mean_rating_values <- mean_rating_values %>%
-      filter(prolific_id %in% selected_participants)
+      filter(subj_id %in% selected_participants)
     
     current_items_df <- items_df %>%
-      filter(prolific_id %in% selected_participants)
+      filter(subj_id %in% selected_participants)
     
     # Filter and prepare mean_conf data
     current_mean_conf_df <- mean_conf_df %>%
-      filter(PROLIFIC_PID %in% selected_participants) %>%
-      rename(prolific_id = PROLIFIC_PID)  # Standardize the ID column name
+      filter(subj_id %in% selected_participants) %>%
+      rename(subj_id = subj_id)  # Standardize the ID column name
     
     # Create a single random rating assignment for each participant
     participant_ratings <- data.frame(
-      prolific_id = selected_participants,
+      subj_id = selected_participants,
       mean_rating = sample(mean_rating_values$mean_rating,
                            size = length(selected_participants),
                            replace = FALSE)
@@ -378,7 +374,7 @@ perform_sds_correction_iterations <- function(items_df, mean_rating_values, mean
     # Update mean ratings in items_df for this iteration
     current_sds_items <- current_items_df %>%
       select(-mean_rating) %>%
-      left_join(participant_ratings, by = "prolific_id")
+      left_join(participant_ratings, by = "subj_id")
     
     # Initialize results list for this iteration
     results <- list()
@@ -403,7 +399,7 @@ perform_sds_correction_iterations <- function(items_df, mean_rating_values, mean
     
     # Calculate totals per participant
     participant_totals <- iteration_results %>%
-      group_by(prolific_id) %>%
+      group_by(subj_id) %>%
       summarise(
         total_sds = sum(item_value),
         total_sds_corrected = sum(item_corrected)
@@ -411,7 +407,7 @@ perform_sds_correction_iterations <- function(items_df, mean_rating_values, mean
     
     # Calculate correlation using the totals
     current_results <- participant_totals %>%
-      left_join(current_mean_conf_df, by = "prolific_id")
+      left_join(current_mean_conf_df, by = "subj_id")
     
     # Store correlation coefficient
     correlation_df$correlation[iter] <- cor.test(
@@ -422,9 +418,9 @@ perform_sds_correction_iterations <- function(items_df, mean_rating_values, mean
     
     # Join totals back to the item-level data
     full_iteration_data <- iteration_results %>%
-      left_join(participant_totals, by = "prolific_id") %>%
+      left_join(participant_totals, by = "subj_id") %>%
       mutate(iteration = iter) %>%
-      select(iteration, prolific_id, item_name, item_value, mean_rating, 
+      select(iteration, subj_id, item_name, item_value, mean_rating, 
              item_corrected, total_sds, total_sds_corrected)
     
     # Store in all_iterations_data
@@ -496,13 +492,13 @@ sds_permutation_figure<-
 #ggsave("./figures/sds_permutation.png", width = 8, height = 6, dpi = 300)
 
 ```
-The resulting distribution of correlation coefficients served as a null distribution, representing the expected drop in correlation coefficient if inattentive responding and acquiescence were not truly associated with OCI-R scores. We compared our observed drop in the correlation coefficient (r=0.19), calculated as the difference between the original correlation coefficient (r=0.28) and correlation coefficient observed after controlling for acquiescence and inattentiveness using actual mean ratings and removing truly inattentive participants (r=0.08), to this null distribution. We found that all 1,000 iterations produced smaller Pearson correlation coefficients drops than our observed value (p < .001), which suggests that the reduction in correlation in our main analysis represents a genuine effect of controlling for inattentiveness and acquiescence (figure A8). We ran the same analysis for the SDS questionnaire. Out of 1,000 iterations in our null distribution, 626 produced correlation coefficients below our observed value, indicating that the observed reduction in correlation was not significantly different from what would be expected by chance (`r print_p(sds_permutation_p_value)`, figure A9).
+The resulting distribution of correlation coefficients served as a null distribution, representing the expected drop in correlation coefficient if inattentive responding and acquiescence were not truly associated with OCI-R scores. We compared our observed drop in the correlation coefficient (r=0.19), calculated as the difference between the original correlation coefficient (r=0.28) and correlation coefficient observed after controlling for acquiescence and inattentiveness using actual mean ratings and removing truly inattentive participants (r=0.08), to this null distribution. We found that all 1,000 iterations produced smaller Pearson correlation coefficients drops than our observed value (p < .001), which suggests that the reduction in correlation in our main analysis represents a genuine effect of controlling for inattentiveness and acquiescence (figure A7). We ran the same analysis for the SDS questionnaire. Out of 1,000 iterations in our null distribution, 626 produced correlation coefficients below our observed value, indicating that the observed reduction in correlation was not significantly different from what would be expected by chance (`r print_p(sds_permutation_p_value)`, figure A8).
 
-```{r oci_conf_null_figure, echo=FALSE, fig.cap="Figure A8 – Null distribution of OCI-R–confidence correlations drop from a permutation test. Distribution of drop in Pearson correlation coefficients from 1,000 permutation iterations with randomised subset of participants (N=46) and mean rating values (blue). The red dashed line shows the observed drop in correlation after controlling for inattentive responding and acquiescence."}
+```{r oci_conf_null_figure, echo=FALSE, fig.cap="Figure A7 – Null distribution of OCI-R–confidence correlations drop from a permutation test. Distribution of drop in Pearson correlation coefficients from 1,000 permutation iterations with randomised subset of participants (N=46) and mean rating values (blue). The red dashed line shows the observed drop in correlation after controlling for inattentive responding and acquiescence."}
 knitr::include_graphics("../figures/oci_permutation.png")
 ```
 
-```{r sds_conf_null_figure, echo=FALSE, fig.cap="Figure A9 – Null distribution of SDS–confidence correlations drop from a permutation test. The same conventions as in Figure A8 are used."}
+```{r sds_conf_null_figure, echo=FALSE, fig.cap="Figure A8 – Null distribution of SDS–confidence correlations drop from a permutation test. The same conventions as in Figure A8 are used."}
 
 knitr::include_graphics("../figures/sds_permutation.png")
 ```
@@ -631,28 +627,25 @@ labs(
 
 ### Model estimation of inattentive responding
 We estimated the prevalence of inattentive responding through a detection analysis and model fitting procedure. First, a detection rate analysis was conducted to examine the effectiveness of using multiple infrequency items. For this analysis, we calculated the percentage of participants identified as inattentive based on combinations of one to four infrequency items. For each possible combination of k items (where k = 1, 2, 3, or 4), we computed the percentage of participants who failed at least one item within that combination. We then averaged these percentages across all possible combinations of the same size to obtain the mean detection rate for each number of items. We found the following innattentive responders detection rates: 11.18% with one item, 17.54% with two items, 21.45% with three items, and 24.21% with four items.
-To estimate the total proportion of inattentive respondents in our sample, including those not detected by our infrequncy items, we fit a model assuming that: (1) a fixed proportion of participants (x) respond inattentively, and (2) each inattentive participant has a probability (p) of being caught by any single infrequency item. Under this model, the probability of detecting an inattentive participant with n items is given by:
+
+To estimate the total proportion of inattentive respondents in our sample, including those not detected by our infrequency items, we fit a model assuming that: (1) a fixed proportion of participants (x) respond inattentively, and (2) each inattentive participant has a probability (p) of being captured by any single infrequency item. Under this model, the probability of detecting an inattentive participant with n items is given by:
 
 $Prob(detection) = x * (1 - (1-p)^n)$ 
 
-Model parameters were estimated using a grid approximation approach. We created a 101 × 101 grid of possible parameter values, with both x and p ranging from 0 to 1 in increments of 0.01. For each parameter combination, we calculated the negative log-likelihood (NLL) of observing our detection rates given those parameters:
+Model parameters were estimated using a grid approximation approach. We created a 101 × 101 grid of possible parameter values, with both x (the proportion of inattentive participants) and p (the probability of an inattentive participants being captured by a single infrequency item) ranging from 0 to 1 in increments of 0.01. For each parameter combination, we calculated the negative log-likelihood (NLL) of observing our detection rates given those parameters:
 
-$NLL(x,p) = -∑log[Likelihood(observed_n | total_n, predicted-rate)]$
+$NLL(x,p) = -∑log[Likelihood(observed_n | N, x-p)]$
 
-where the likelihood was calculated using the binomial probability mass function, with observed_n representing the number of participants identified as inattentive with n items, total_n the total sample size after exclusion, and predicted_rate the model's predicted detection rate for n items. The parameter combination that minimized the NLL was selected as the best-fitting model.
-The grid approximation identified optimal parameter values of x = `r print_num(best_param_calc_nll$x)` and p = `r print_num(best_param_calc_nll$p)`, suggesting that 28% of participants were responding inattentively, with each inattentive participant having a 39% probability of being caught by any single infrequency item. The model's predictions closely matched the observed detection rates (Figure A10). 
+where the likelihood was calculated using the binomial probability mass function, with N representing the total number of participants. The parameter combination that minimized the NLL was selected as the best-fitting model.
 
-```{r model-inattentive-detection-fig, echo=FALSE, fig.cap="Figure A10 - Observed and predicted inattentive detection rates as a function of the number of infrequency items. Observed detection rates (blue) represent the mean percentage of participants identified as inattentive across all possible combinations of k infrequency items. The red line represents the best-fitting model, which estimated that 28% of participants responded inattentively, with each inattentive participant having a 39% probability of being detected by a single infrequency item."}
+NLL reached a minimum for x = `r print_num(best_param_calc_nll$x)` and p = `r print_num(best_param_calc_nll$p)`, suggesting that 28% of participants were responding inattentively, with each inattentive participant having a 39% probability of being caught by any single infrequency item. The model's predictions closely matched the observed detection rates (Figure A9). 
+
+```{r model_inattentive_detection_fig, echo=FALSE, fig.cap="Figure A9 - Observed and predicted inattentive detection rates as a function of the number of infrequency items. Observed detection rates (blue) represent the mean percentage of participants identified as inattentive across all possible combinations of k infrequency items. The red line represents the best-fitting model, which estimated that 28% of participants responded inattentively, with each inattentive participant having a 39% probability of being detected by a single infrequency item."}
 knitr::include_graphics("../figures/model_fit_inattentive_detection.png")
 ```
 
 
 ``` {r skewness-factors, echo=FALSE}
-# Load necessary packages
-library(psych)
-library(polycor)
-#library(nFactors)
-
 
 # Function to run factor analysis on simulated data
 run_factor_analysis <- function(seed) {
@@ -705,108 +698,135 @@ run_factor_analysis <- function(seed) {
   responses_df <- as.data.frame(responses)
   colnames(responses_df) <- paste0("Item", 1:n_items)
   
-  #Create heterogeneous correlation matrix
+  # Create heterogeneous correlation matrix
   hetcor_result <- polycor::hetcor(responses_df, ML = TRUE)
   correlation_matrix <- hetcor_result$correlations
   
   # Run factor analysis with psych::fa() function, 2 factors, and oblimin rotation
   fa_result <- psych::fa(correlation_matrix, 
-                        nfactors = 2,  # Fixed at 2 factors as specified
-                        rotate = "oblimin",
-                        fm = "ml")
+                         nfactors = 2,  # Fixed at 2 factors as specified
+                         rotate = "oblimin",
+                         fm = "ml")
   
-  # Extract factor loadings into a data frame
+  # Extract factor loadings
   loadings_matrix <- fa_result$loadings
-  loadings_df <- as.data.frame(unclass(loadings_matrix))
+  
+  # Extract factor weights
+  weights_matrix <- fa_result$weights
+  
+  # Ensure mean weight per factor is positive
+  for (f in 1:ncol(loadings_matrix)) {
+    mean_loading <- mean(loadings_matrix[, f])
+    
+    # If mean loading is negative, flip the sign of all loadings in this factor
+    if (mean_loading < 0) {
+      loadings_matrix[, f] <- -loadings_matrix[, f]
+      
+      # Also update the factor loadings in the fa_result
+      fa_result$loadings[, f] <- -fa_result$loadings[, f]
+      
+      # Update the weights 
+      fa_result$weights[, f] <- -fa_result$weights[, f]
+      weights_matrix[, f] <- -weights_matrix[, f]
+    }
+  }
   
   # Calculate skewness for each item
   item_skewness <- apply(responses, 2, moments::skewness)
-  
-  # Add item and skewness information
-  loadings_df$item <- 1:n_items
-  loadings_df$skewness <- item_skewness
   
   # Calculate correlations between loadings and skewness for each factor
   # Using all items for each factor separately
   skew_loadings_correlations <- numeric(ncol(loadings_matrix))
   for (f in 1:ncol(loadings_matrix)) {
-        skew_loadings_correlations[f] <- cor(loadings_matrix[, f], item_skewness, method="spearman")  
-        }
+    skew_loadings_correlations[f] <- cor(loadings_matrix[, f], item_skewness, method="spearman")
+  }
+  
+  # Calculate correlations between weights and skewness for each factor
+  skew_weights_correlations <- numeric(ncol(weights_matrix))
+  for (f in 1:ncol(weights_matrix)) {
+    skew_weights_correlations[f] <- cor(weights_matrix[, f], item_skewness, method="spearman")
+  }
+  
+  # Calculate mean correlation across both factors
+  mean_skew_loadings_correlation <- mean(skew_loadings_correlations)
+  mean_skew_weights_correlation <- mean(skew_weights_correlations)
   
   return(list(
     fa_result = fa_result,
     optimal_factors = 2,  # Fixed at 2 as specified
-    loadings_df = loadings_df,
     skew_loadings_correlations = skew_loadings_correlations,
+    skew_weights_correlations = skew_weights_correlations,
+    mean_skew_loadings_correlation = mean_skew_loadings_correlation,
+    mean_skew_weights_correlation = mean_skew_weights_correlation,
     item_skewness = item_skewness
   ))
 }
 
-# Run multiple factor analyses with different seeds to examine stability
+# Run multiple factor analyses with different seeds
 n_simulations <- 1000
 seeds <- 1:n_simulations
-skew_loadings_correlations_matrix <- matrix(NA, nrow = n_simulations, ncol = 2)  # Exactly 2 factors
+
+# Store the mean correlations across factors
+mean_skew_loadings_correlations <- numeric(n_simulations)
+mean_skew_weights_correlations <- numeric(n_simulations)
 
 for (i in 1:n_simulations) {
   result <- run_factor_analysis(seeds[i])
   
-  # Store the correlations between skewness and factor loadings
-  skew_loadings_correlations_matrix[i, ] <- result$skew_loadings_correlations
+  # Store only the mean correlations across factors
+  mean_skew_loadings_correlations[i] <- result$mean_skew_loadings_correlation
+  mean_skew_weights_correlations[i] <- result$mean_skew_weights_correlation
 }
 
-# Create a data frame for analysis
-skew_loadings_cor_results <- as.data.frame(skew_loadings_correlations_matrix, 
-                                          row.names = NULL)
-names(skew_loadings_cor_results) <- paste0("Factor", 1:ncol(skew_loadings_cor_results))
-
-# Calculate summary statistics for each factor
-skew_loadings_summary_stats <- data.frame(
-  Factor = paste0("Factor", 1:ncol(skew_loadings_cor_results)),
-  Mean = colMeans(skew_loadings_cor_results, na.rm = TRUE),
-  SD = apply(skew_loadings_cor_results, 2, sd, na.rm = TRUE)
+# Create data frame for analysis of mean correlations
+mean_correlations_results <- data.frame(
+  MeanLoadingsCorrelation = mean_skew_loadings_correlations,
+  MeanWeightsCorrelation = mean_skew_weights_correlations
 )
 
-# Perform t-tests to see if correlations are significantly different from zero
-skew_loadings_ttest_results <- data.frame(
-  Factor = character(),
+# Calculate summary statistics for mean correlations
+mean_summary_stats <- data.frame(
+  Metric = c("MeanLoadingsCorrelation", "MeanWeightsCorrelation"),
+  Mean = c(mean(mean_skew_loadings_correlations, na.rm = TRUE),
+           mean(mean_skew_weights_correlations, na.rm = TRUE)),
+  SD = c(sd(mean_skew_loadings_correlations, na.rm = TRUE),
+         sd(mean_skew_weights_correlations, na.rm = TRUE))
+)
+
+# Perform t-tests for mean correlations
+mean_ttest_results <- data.frame(
+  Metric = character(),
   t_value = numeric(),
   p_value = numeric(),
   stringsAsFactors = FALSE
 )
 
-for (f in 1:ncol(skew_loadings_cor_results)) {
-  # Get correlation values for current factor across all simulations
-  factor_data <- skew_loadings_cor_results[, f]
-  
-  # Perform one-sample t-test to check if the mean correlation is significantly different from zero
-  t_result <- t.test(factor_data)
-  
-  # Add results to the data frame
-  skew_loadings_ttest_results <- rbind(skew_loadings_ttest_results, 
-                         data.frame(Factor = paste0("Factor", f),
-                                   t_value = t_result$statistic,
-                                   p_value = format(t_result$p.value, scientific = FALSE, digits = 6)))
-}
-  
-# Extract values from the simulation results
-# Means and SDs for each factor
-f1_mean <- skew_loadings_summary_stats$Mean[1]
-f1_sd <- skew_loadings_summary_stats$SD[1]
-f2_mean <- skew_loadings_summary_stats$Mean[2]
-f2_sd <- skew_loadings_summary_stats$SD[2]
+# # For mean loadings correlation
+# loadings_t_result <- t.test(mean_skew_loadings_correlations)
+# mean_ttest_results <- rbind(mean_ttest_results,
+#                             data.frame(Metric = "MeanLoadingsCorrelation",
+#                                        t_value = loadings_t_result$statistic,
+#                                        p_value = format(loadings_t_result$p.value, scientific = FALSE, digits = 6)))
+
+# For mean weights correlation
+weights_t_result <- t.test(mean_skew_weights_correlations)
+mean_ttest_results <- rbind(mean_ttest_results,
+                            data.frame(Metric = "MeanWeightsCorrelation",
+                                       t_value = weights_t_result$statistic,
+                                       p_value = format(weights_t_result$p.value, scientific = FALSE, digits = 6)))
 
 # Perform one-sample t-tests on the correlation values
-f1_ttest <- t.test(skew_loadings_cor_results$Factor1)
-f2_ttest <- t.test(skew_loadings_cor_results$Factor2)
+weights_ttest <- t.test(mean_correlations_results$MeanWeightsCorrelation, mu = 0, alternative = "two.sided")
+
+
 ``` 
 
-## Simulation of the relationship between item skewness and factor loadings
+## Simulation of the relationship between item skewness and factor weights
 
-To assess the relationship between item skewness and factor loadings, we conducted a simulation using R. We simulated responses from 200 participants on a 20-item questionnaire measuring two distinct latent traits. The first 10 items measured the first latent trait, while the remaining 10 items measured the second latent trait.
-Data generation followed these steps: First, two underlying traits (a and b) were simulated for each participant from normal distributions (M = 0, SD = 0.5). Responses were then generated by adding random normal error (SD = 1) to the relevant trait value, using the mean of the latent variable.  To introduce varying degrees of skewness, these responses were transformed using beta distributions with shape parameters ranging from 2 to 11. Finally, responses were discretized to a 7-point scale to represent typical questionnaire data.
+To assess the relationship between item skewness and factor weights, we conducted a simulation using R. We simulated responses from 200 participants on a 20-item questionnaire measuring two distinct latent traits. The first 10 items measured the first latent trait, while the remaining 10 items measured the second latent trait. Data generation followed these steps: First, two underlying traits (a and b) were simulated for each participant from normal distributions (M = 0, SD = 0.5). Responses were then generated by adding random normal error (SD = 1) to the relevant trait value, using the mean of the latent variable. Then, the cumulative density function of the normal distribution $N(0,1)$ was used to translate individual responses to quantiles, ranging from 0 to 1. Then, quantile scores were projected back to ratings, using distributions of different levels of skewness for different items. This was done by using the inverse cumulative density function of beta distributions with shape parameters $b=2$ for all items, and a ranging from 2 to 11. Finally, scores were binned into seven bins of equal width. 
 
 ### Factor Analysis Procedure
-For each simulated dataset, we followed the factors analysis procedure of @gillanDaw2016. We calculated a heterogeneous correlation matrix using polychoric correlations (via polycor::hetcor() with Maximum likelihood estimation) to account for the ordinal nature of the data. We then conducted exploratory factor analysis using the psych package (specifically psych::fa()) with maximum likelihood estimation, a fixed two-factor solution, and oblimin rotation. Item skewness was measured using moment package, and Spearman correlations between item skewness and the corresponding factor loadings were calculated.
+For each simulated dataset, we followed the factors analysis procedure of @gillanDaw2016. We calculated a heterogeneous correlation matrix using polychoric correlations (via polycor::hetcor() with Maximum likelihood estimation) to account for the ordinal nature of the data. We then conducted a factor analysis using the psych package (specifically psych::fa()) with maximum likelihood estimation, a fixed two-factor solution, and oblimin rotation ensuring the mean weight per factor is positive. Item skewness was measured using moment package, and Spearman correlations between item skewness and the corresponding factor weights were calculated. We then took the averaged correlation across the factors. 
 
-We repeated this procedure 1,000 times using different random seeds (1-1000). On average, we found a weak negative correlation between item skewness and items loadings for both factors: Factor 1 (M = `r printnum(f1_mean, digits = 2)`, SD = `r printnum(f1_sd, digits = 2)`) and Factor 2 (M = `r printnum(f2_mean, digits = 2)`, SD = `r printnum(f2_sd, digits = 2)`). These averaged correlations were significantly different from zero (`r apa_print(f1_ttest)$full_result`) and (`r apa_print(f2_ttest)$full_result`), respectively.
+We repeated this procedure 1000 times using different random seeds. On average, we observed a pattern of weak negative correlations between item skewness and item weights (`r apa_print(weights_ttest)$full_result`), meaning that item weights were slightly closer to zero for more skewed items. This effect is much weaker, and in the opposite direction, to what we find for the CIT dimension in both datasets.  
 
