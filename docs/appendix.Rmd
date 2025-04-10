@@ -4,15 +4,21 @@
 
 In order to control for the possible effect of questionnaire content on the correlation between standard and reversed items with confidence, we performed a linear mixed model predicting item-correlation with confidence from item coding (standard/reversed) with random intercept for questionnaire (correlation ~ reversed + (1|questionnaire)). Results revealed that in both datasets reversed items showed lower correlations with confidence compared to standard items, even when accounting for questionnaire-level variation in the model: Seow and Gillan, 2020: `r apa_print(conf_cor_reversed_SG2020_m)$full_result$is_reversedreversed`, Rouault et al, 2018: `r apa_print(conf_cor_reversed_R2018_m)$full_result$is_reversedreversed`. We also tested a model allowing the effect of reversal to vary across questionnaires (random slopes), but model diagnostics indicated this model was too complex for the available data.
 
-### Within-questionnaire analysis of skewness-confidence correlations 
+### Mixed linear model analysis of skewness effects on item-confidence correlation
+To examine whether the relationship between item skewness and item-confidence correlation was consistent across different questionnaires, we fitted a linear mixed models predicting item-confidence correlation from item-level skewness, including random intercepts and random slopes for questionnaire (conf_cor ~ skewness + (1 + skewness | questionnaire)). Results revealed a significant positive effect of skewness in all three datasets, even when allowing the strength of the relationship to vary across questionnaires: Rouault et al., 2018: (`r apa_print(rouault_skew_conf_lmm)$full_result$skewness`), Seow & Gillan, 2020: (`r apa_print(sg_skew_conf_lmm)$full_result$skewness`) and Hoven et al., 2023 (`r apa_print(hoven_skew_conf_lmm)$full_result$skewness`).The Hoven model showed signs of overfitting, likely due to the smaller number of anxiety items (7 items in the GAD-7 vs. 20 items in the STAI used in the Rouault and Seow & Gillan datasets). Therefore, we fitted an additional model with random intercept only (conf_cor ~ skewness + (1 | questionnaire)). This model also revealed a significant positive effect of skewness on item–confidence correlation (`r apa_print(hoven_skew_conf_lmm_intercept_only)$full_result$skewness`), supporting a general within-questionnaire relationship that is not solely attributable to between-questionnaire differences.
 
-```{r within-quest-analysis-R2018, include = TRUE, echo=FALSE, fig.cap="Figure A1 Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Rouault et al. (2018). Each panel represents a different questionnaire, and each point represents an individual item. The x-axis shows the skewness of item responses. Y-axis shows the correlation between item ratings and confidence across participants. The black line represents the linear fit with 95% confidence intervals (gray shading). Pearson correlation coefficients (R) and corresponding p-values are shown for each questionnaire.", fig.lp=""}
+
+```{r within-quest-analysis-R2018, include = TRUE, echo=FALSE, fig.cap="Figure A1 Within-questionnaire relationship of item kkewness and item-confidence correlations in Rouault et al. (2018). Each panel represents a different questionnaire, and each point represents an individual item. The x-axi3s shows the skewness of item responses. Y-axis shows the correlation between item ratings and confidence across participants. The black line represents the linear fit with 95% confidence intervals (gray shading). Spearman correlation coefficients (R) and corresponding p-values are shown for each questionnaire.", fig.lp=""}
 
 knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_R2018.png") 
 ```
 
-```{r figure_within_quest_analysis_SG2020, include = TRUE, echo=FALSE, fig.cap="Figure A2 Within-Questionnaire Analysis of Item Skewness and Item-Confidence Correlations in Seow and Gillan (2020). The same conventions as in Figure A1 are used."}
+```{r figure_within-quest-analysis-SG2020, include = TRUE, echo=FALSE, fig.cap="Figure A2 Within-questionnaire relationship of item kkewness and item-confidence correlations in Seow and Gillan (2020). The same conventions as in Figure A1 are used."}
 knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_SG2020.png")
+```
+
+```{r figure-within-quest-analysis-H2023, include = TRUE, echo=FALSE, fig.cap="Figure A3 Within-questionnaire relationship of item kkewness and item-confidence correlations in Hoven et al. (2023). The same conventions as in Figure A1 are used."}
+knitr::include_graphics("../figures/skewness_confidence_by_questionnaire_H2023.png")
 ```
 
 ```{r figure_R2018_unfiltered, include=FALSE}
@@ -23,11 +29,26 @@ figure_R2018_unfiltered <- R2018_items_table %>%
   geom_point(alpha = 0.7, size = 2.5) +
   labs(subtitle = "Rouault et al., 2018",
        x = "Skewness",
-       y = "Confidence Correlation",
+       y = "Item-Confidence Correlation",
        shape = "Questionnaire",
        color = "Reversed") +  
-  scale_shape_manual(values = c(0, 1, 15, 10, 2, 16, 11, 3)) + 
-  scale_color_manual(values = custom_colors) + 
+    scale_shape_manual(
+  values = questionnaire_shape_map,
+  labels = c(
+    "alcohol" = "Alcohol",
+    "social_anxiety" = "Social Anxiety",
+    "ocd" = "OCD (OCI-R)",
+    "eat" = "EAT",
+    "depression" = "Depression (Zung)",
+    "impulsivity" = "Impulsivity (BIS)",
+    "apathy" = "Apathy",
+    "anxiety" = "STAI-anxiety",
+    "gad_anxiety" = "GAD-anxiety"
+  ))+
+    scale_color_manual(
+    values = custom_colors,
+    labels = c("Standard", "Reversed")
+  ) + 
   geom_smooth(aes(group = 1), method = "lm", se = TRUE, color = "black", show.legend = FALSE) +
   ggpubr::stat_cor(aes(group = 1), method = "spearman", color = "black", show.legend = FALSE, label.y = 0.35, label.x = 0, size = 6) +
   theme_minimal() +
@@ -38,12 +59,29 @@ figure_R2018_unfiltered <- R2018_items_table %>%
     legend.background = element_rect(fill = "white", color = NA)
   )
 
+ggsave(
+  filename = "../figures/figure_R2018_unfiltered.png",
+  plot = figure_R2018_unfiltered,
+  width = 10,
+  height = 6,
+  dpi = 300
+)
 
 ```
 
-```{r figure_R2018_unfiltered_fig, fig.cap="Figure A3 Correlation between Item -Level Skewness and Confidence with Extreme Skewed Items Included. Relationship between item-level skewness and item-confidence correlation in Rouault et al., (2018) including full skewness scale. Each point represents an item from the self-report questionnaires, with the shapes indicating different questionnaires and color indicating whether the item was reversed or not. The x-axis represents the skewness score of each item; the y-axis represents the Pearson correlation coefficient between the item’s skewness and mean confidence ratings."}
+```{r figure_R2018_unfiltered_fig, fig.cap="Figure A4 Correlation between Item -Level Skewness and Confidence with Extreme Skewed Items Included. Relationship between item-level skewness and item-confidence correlation in Rouault et al., (2018) including full skewness scale. Each point represents an item from the self-report questionnaires, with the shapes indicating different questionnaires and color indicating whether the item was reversed or not. The x-axis represents the skewness score of each item; the y-axis represents the Spearman correlation coefficient between the item’s skewness and mean confidence ratings."}
 knitr::include_graphics("../figures/figure_R2018_unfiltered.png")
 ```
+
+
+
+### Associations between transdiagnostic dimensional weights with skewness and coding direction in Hoven et al., 2023 
+
+As Hoven et al., 2023 used the GAD-7 instead of the STAI to measure anxiety (as was used in the original factor analysis performed by Gillan et al., 2016), we extracted factor weights only for the items that were common across the two studies. Which were all the other measures except the GAD-7. Consistent with Analysis 3 in both Rouault et al. (2018) and Seow and Gillan (2020), our reanalysis of Hoven et al. (2023) revealed a positive correlation between item weight and item skewness on the CIT dimension, such that more skewed items contributed more strongly to the CIT factor (`r apa_print(H2023_item_weight_skewness_cor_CIT)$full_result`; Figure A5, left panel). Similarly, the AD dimension showed a pattern consistent with the other two datasets, with reversed items of low skewness loading heavily on the AD factor (Figure A5, right panel).
+
+```{r figure_H2023_item_weight_skewness, include = TRUE, echo=FALSE, fig.cap="Figure A5 The effect of reversed items and skewness on the CIT and AD dimensions in Hoven et al. (2023). Same conventions as Figure 6 are used."}
+knitr::include_graphics("../figures/hoven_dimensions_plot.png")
+``` 
 
 ### Effects of inattentiveness and acquiescence on confidence controlling for sex and age
 We conducted multiple regression analyses to examine the effects of inattentiveness and acquiescence on mean confidence while controlling for sex and age. In the first model with inattentiveness, sex, and age as independent variables, we found that inattentiveness significantly predicted mean confidence even when controlling for age and sex, `r apa_print(conf_inatt_m)$full_result$failed_attentionInattentive`. In the second model with acquiescence, sex, and age as independent variables, we found that acquiescence also significantly predicted mean confidence when controlling for sex and age, `r apa_print(conf_acq_m)$full_result$mean_rating`. 
@@ -52,11 +90,11 @@ We conducted multiple regression analyses to examine the effects of inattentiven
 
 In our sample, the distribution of Sex (Male/Female self-reported on Prolific; two participants who did not report their sex were excluded from this analysis) differed between attentive and inattentive participants. Among attentive responders, there was no significant sex difference (Male: n = 69; Female: n = 73), whereas among inattentive participants, males were more frequent (Male: n = 30; Female: n = 16). This effect was only marginally significant in a chi-square test: `r apa_print(chisq_result, n = chi_sqaure__sample_size)$statistic[[1]]`
 
-```{r sex_differences_inatten, echo=FALSE, fig.cap="Figure A4 – Sex differences in inattentiveness prevalence. "}
+```{r sex_differences_inatten, echo=FALSE, fig.cap="Figure A6 – Sex differences in inattentiveness prevalence. "}
 knitr::include_graphics("../figures/sex_differences_inatten_fig.png")
 ```
 
-```{r sex_differences_conf, echo=FALSE, fig.cap="Figure A5 – Mean Confidence by Attentiveness and Sex. Scatter plot showing mean confidence ratings across attentive and inattentive responders, separated by sex. Blue and pink points represent attentive and inattentive participants, respectively. Error bars indicate the standard error for each subgroup."}
+```{r sex_differences_conf, echo=FALSE, fig.cap="Figure A7 – Mean Confidence by Attentiveness and Sex. Scatter plot showing mean confidence ratings across attentive and inattentive responders, separated by sex. Blue and pink points represent attentive and inattentive participants, respectively. Error bars indicate the standard error for each subgroup."}
 
 knitr::include_graphics("../figures/sex_differences_conf_fig.png")
 
@@ -68,9 +106,9 @@ As inattentive responders generally perform worse than attentive responders, the
 
 $difficulty = -increment$
 
-Higher increments result in easier perceptual decisions. The mean difficulty was then calculated for each participant to assess overall task difficulty. We found that inattentive participants encountered significantly easier task on average compared to attentive participants, `r apa_print(difficulty_t_test)$statistic` (figure A6 left panel). We also found a negative correlation between task difficulty and mean confidence ratings, indicating that as the task became easier, mean confidence increased, `r apa_print(difficulty_confidence_cor)$statistic` (figure A6, right panel).
+Higher increments result in easier perceptual decisions. The mean difficulty was then calculated for each participant to assess overall task difficulty. We found that inattentive participants encountered significantly easier task on average compared to attentive participants, `r apa_print(difficulty_t_test)$statistic` (figure A8 left panel). We also found a negative correlation between task difficulty and mean confidence ratings, indicating that as the task became easier, mean confidence increased, `r apa_print(difficulty_confidence_cor)$statistic` (figure A8, right panel).
 
-```{r staircase_figure, echo=FALSE, fig.cap="Figure A6 – Task difficulty and inattentiveness. Left panel: mean difficulty ratings as a function of attentiveness, with data points for attentive and inattentive responses shown in red and blue, respectively. Black markers and error bars represent the mean and standard error, respectively. Right panel: mean confidence as a function of mean difficulty, with attentive and inattentive responses again differentiated by color. A negative correlation is observed, as shown by the black regression line (shaded area represents the confidence interval)."}
+```{r staircase_figure, echo=FALSE, fig.cap="Figure A8 – Task difficulty and inattentiveness. Left panel: mean difficulty ratings as a function of attentiveness, with data points for attentive and inattentive responses shown in red and blue, respectively. Black markers and error bars represent the mean and standard error, respectively. Right panel: mean confidence as a function of mean difficulty, with attentive and inattentive responses again differentiated by color. A negative correlation is observed, as shown by the black regression line (shaded area represents the confidence interval)."}
 knitr::include_graphics("../figures/staircase_conf_fig.png")
 
 ```
@@ -492,13 +530,13 @@ sds_permutation_figure<-
 #ggsave("./figures/sds_permutation.png", width = 8, height = 6, dpi = 300)
 
 ```
-The resulting distribution of correlation coefficients served as a null distribution, representing the expected drop in correlation coefficient if inattentive responding and acquiescence were not truly associated with OCI-R scores. We compared our observed drop in the correlation coefficient (r=0.19), calculated as the difference between the original correlation coefficient (r=0.28) and correlation coefficient observed after controlling for acquiescence and inattentiveness using actual mean ratings and removing truly inattentive participants (r=0.08), to this null distribution. We found that all 1,000 iterations produced smaller Pearson correlation coefficients drops than our observed value (p < .001), which suggests that the reduction in correlation in our main analysis represents a genuine effect of controlling for inattentiveness and acquiescence (figure A7). We ran the same analysis for the SDS questionnaire. Out of 1,000 iterations in our null distribution, 626 produced correlation coefficients below our observed value, indicating that the observed reduction in correlation was not significantly different from what would be expected by chance (`r print_p(sds_permutation_p_value)`, figure A8).
+The resulting distribution of correlation coefficients served as a null distribution, representing the expected drop in correlation coefficient if inattentive responding and acquiescence were not truly associated with OCI-R scores. We compared our observed drop in the correlation coefficient (r=0.19), calculated as the difference between the original correlation coefficient (r=0.28) and correlation coefficient observed after controlling for acquiescence and inattentiveness using actual mean ratings and removing truly inattentive participants (r=0.08), to this null distribution. We found that all 1,000 iterations produced smaller Pearson correlation coefficients drops than our observed value (p < .001), which suggests that the reduction in correlation in our main analysis represents a genuine effect of controlling for inattentiveness and acquiescence (figure A9). We ran the same analysis for the SDS questionnaire. Out of 1,000 iterations in our null distribution, 626 produced correlation coefficients below our observed value, indicating that the observed reduction in correlation was not significantly different from what would be expected by chance (`r print_p(sds_permutation_p_value)`, figure A10).
 
-```{r oci_conf_null_figure, echo=FALSE, fig.cap="Figure A7 – Null distribution of OCI-R–confidence correlations drop from a permutation test. Distribution of drop in Pearson correlation coefficients from 1,000 permutation iterations with randomised subset of participants (N=46) and mean rating values (blue). The red dashed line shows the observed drop in correlation after controlling for inattentive responding and acquiescence."}
+```{r oci_conf_null_figure, echo=FALSE, fig.cap="Figure A9 – Null distribution of OCI-R–confidence correlations drop from a permutation test. Distribution of drop in Pearson correlation coefficients from 1,000 permutation iterations with randomised subset of participants (N=46) and mean rating values (blue). The red dashed line shows the observed drop in correlation after controlling for inattentive responding and acquiescence."}
 knitr::include_graphics("../figures/oci_permutation.png")
 ```
 
-```{r sds_conf_null_figure, echo=FALSE, fig.cap="Figure A8 – Null distribution of SDS–confidence correlations drop from a permutation test. The same conventions as in Figure A8 are used."}
+```{r sds_conf_null_figure, echo=FALSE, fig.cap="Figure A10 – Null distribution of SDS–confidence correlations drop from a permutation test. The same conventions as in Figure A9 are used."}
 
 knitr::include_graphics("../figures/sds_permutation.png")
 ```
@@ -638,9 +676,9 @@ $NLL(x,p) = -∑log[Likelihood(observed_n | N, x-p)]$
 
 where the likelihood was calculated using the binomial probability mass function, with N representing the total number of participants. The parameter combination that minimized the NLL was selected as the best-fitting model.
 
-NLL reached a minimum for x = `r print_num(best_param_calc_nll$x)` and p = `r print_num(best_param_calc_nll$p)`, suggesting that 28% of participants were responding inattentively, with each inattentive participant having a 39% probability of being caught by any single infrequency item. The model's predictions closely matched the observed detection rates (Figure A9). 
+NLL reached a minimum for x = `r print_num(best_param_calc_nll$x)` and p = `r print_num(best_param_calc_nll$p)`, suggesting that 28% of participants were responding inattentively, with each inattentive participant having a 39% probability of being caught by any single infrequency item. The model's predictions closely matched the observed detection rates (Figure A11). 
 
-```{r model_inattentive_detection_fig, echo=FALSE, fig.cap="Figure A9 - Observed and predicted inattentive detection rates as a function of the number of infrequency items. Observed detection rates (blue) represent the mean percentage of participants identified as inattentive across all possible combinations of k infrequency items. The red line represents the best-fitting model, which estimated that 28% of participants responded inattentively, with each inattentive participant having a 39% probability of being detected by a single infrequency item."}
+```{r model_inattentive_detection_fig, echo=FALSE, fig.cap="Figure A11 - Observed and predicted inattentive detection rates as a function of the number of infrequency items. Observed detection rates (blue) represent the mean percentage of participants identified as inattentive across all possible combinations of k infrequency items. The red line represents the best-fitting model, which estimated that 28% of participants responded inattentively, with each inattentive participant having a 39% probability of being detected by a single infrequency item."}
 knitr::include_graphics("../figures/model_fit_inattentive_detection.png")
 ```
 
