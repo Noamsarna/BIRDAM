@@ -935,29 +935,31 @@ SG_skewness_conf_cor_label <- ifelse(
 # plot the skewness-confidence correlation
 SeowGillan_skewness_conf <- 
   SG2020_items_table %>%
-  mutate(item = case_when(
-    item == "anxiety.13" ~ "stai.13",
+    mutate(item = case_when(
+    item == "zung.2" ~ "SDS.2",
     TRUE ~ item
   )) %>%
   ggplot(aes(x = skewness, y = conf_cor, label = item, color = is_reversed, shape = questionnaire)) +
-geom_point(alpha = 0.7, size = 2.5, show.legend = FALSE)+
+  geom_point(alpha = 0.7, size = 2.5, show.legend = FALSE) +
   labs(
     subtitle = "Seow & Gillan 2020",
     x = "Skewness",
-    y = "") +  
+    y = ""
+  ) +  
   scale_shape_manual(
-  values = questionnaire_shape_map,
-  labels = c(
-    "alcohol" = "Alcohol",
-    "social_anxiety" = "Social Anxiety",
-    "ocd" = "OCD (OCI-R)",
-    "eat" = "EAT",
-    "depression" = "Depression (Zung)",
-    "impulsivity" = "Impulsivity (BIS)",
-    "apathy" = "Apathy",
-    "anxiety" = "STAI-anxiety",
-    "gad_anxiety" = "GAD-anxiety"
-  ))+
+    values = questionnaire_shape_map,
+    labels = c(
+      "alcohol" = "Alcohol",
+      "social_anxiety" = "Social Anxiety",
+      "ocd" = "OCD (OCI-R)",
+      "eat" = "EAT",
+      "depression" = "Depression (Zung)",
+      "impulsivity" = "Impulsivity (BIS)",
+      "apathy" = "Apathy",
+      "anxiety" = "STAI-anxiety",
+      "gad_anxiety" = "GAD-anxiety"
+    )
+  ) +
   scale_color_manual(
     values = custom_colors,
     labels = c("Standard", "Reversed")
@@ -973,10 +975,10 @@ geom_point(alpha = 0.7, size = 2.5, show.legend = FALSE)+
     size = 6
   ) +
   coord_cartesian(xlim = c(0, 6), ylim = c(-0.2, 0.4)) +
-  geom_text(
-    data = . %>% filter(item == "stai.13"), 
-    aes(label = item), vjust = -1, color = "black", size = 4
-  ) +
+geom_text(
+  data = . %>% filter(item == "SDS.2"), 
+  aes(label = item), vjust = -1, hjust = -0.2, color = "black", size = 4
+)+
   theme(
     plot.subtitle = element_text(size = 20),
     plot.title = element_text(size = 20),
@@ -984,6 +986,7 @@ geom_point(alpha = 0.7, size = 2.5, show.legend = FALSE)+
     axis.text = element_text(size = 14),
     plot.margin = margin(t = 10, r = 20, b = 10, l = 10)
   )
+
 # create the r and p value label for Hoven et al., 2023
 hoven_skewness_conf_cor_label <- ifelse(
   hoven_cor_result$p.value < 0.001,
@@ -1010,7 +1013,7 @@ hoven_items_table %>%
     "social_anxiety" = "Social Anxiety",
     "ocd" = "OCD (OCI-R)",
     "eat" = "EAT",
-    "depression" = "Depression (Zung)",
+    "depression" = "Depression (SDS)",
     "impulsivity" = "Impulsivity (BIS)",
     "apathy" = "Apathy",
     "anxiety" = "STAI-anxiety",
@@ -1070,8 +1073,8 @@ plot_Rouault_eat_2 <- ggplot(Rouault2018_df, aes(x = factor(eat.2), y = mean_con
        subtitle = "Eat item 2: 'I avoid eating when I am hungry'",
        y = 'Mean confidence (1-6)')
 
-plot_SG_STAI13 <- 
- ggplot(SeowGillan2020_df, aes(x = factor(anxiety.13), y = mean_confidence)) +
+plot_SG_zung2 <- 
+ ggplot(SeowGillan2020_df, aes(x = factor(zung.2), y = mean_confidence)) +
   geom_jitter(width = 0.1, height = 0.0, alpha = 0.5, shape=17, color="#D95F02" ) +
   stat_summary(fun = mean,
                geom = "point",
@@ -1088,13 +1091,13 @@ plot_SG_STAI13 <-
         axis.text.x = element_text(size = 13),
         axis.title.x = element_blank(),
         axis.title.y = element_text(size = 16)) +
-   scale_x_discrete(labels = c("(1) Almost always", "(2) Often", "(3) Sometimes ", "(4) Almost never"))+
-   labs(title = "Negative correlation affected by acquiescence (reversed item)",
-        subtitle = "STAI item 13: 'I feel secure'",
-        y = 'Mean confidence (1-100)')
+  scale_x_discrete(labels = c("(1) Most of \nthe time", "(2) Good part of\n the time", "(3) Some of \nthe time ", "(4) A little of \nthe time"))+
+  labs(title = "Negative correlation affected by acquiescence (reversed item)",
+       subtitle = "SDS item 2: 'Morning is when I feel the best'",
+       y = 'Mean confidence (1-100)')
 
 top_panel <- Rouault2018_skewness_conf|SeowGillan_skewness_conf|hoven_skew_conf
-bottom_panel <- plot_Rouault_eat_2|plot_SG_STAI13
+bottom_panel <- plot_Rouault_eat_2|plot_SG_zung2
 combined_skewness_conf_fig <- top_panel/bottom_panel
 
 # ggsave(filename = "./figures/skewness_confidence_relationship_three_df.png", combined_skewness_conf_fig, width = 14, height = 10, dpi = 300)
@@ -1228,7 +1231,7 @@ Given that inattentive participants were previously found to be biased towards u
 
 To elucidate the relationship between item skewness and item-confidence correlations, consider item 2 from the Eating Attitudes Test (EAT-2): "I avoid eating when I am hungry;" Fig. \@ref(fig:skewness-confidence), bottom left). Endorsement of this item is significantly correlated with mean confidence (`r apa_print(eat.2_conf_cor)$statistic`), but visual inspection suggests that this correlation is largely driven by a small minority of participants who reported "usually" or "always" and also had a high mean confidence rating. This pattern is more suggestive of a spurious correlation due to inattentive responding---participants reporting high agreement with items without paying attention to their content---than of a substantive psychological relationship between self-starvation and confidence.
 
-```{r skewness-confidence, echo=FALSE, fig.cap="Correlation between item-level skewness and item-confidence correlation. Top panel: each point represents an item from the self-report questionnaires, with the shapes indicating different questionnaires. The x-axis represents the skewness score of each item, which was limited to a range of 0-6 for an easier visualization. The y-axis represents the Pearson correlation coefficient between the item's rating and mean confidence, across individuals. The black line represents a linear regression fit, and the shaded gray area represents the standard error of the fit. Bottom Panel: mean confidence ratings by questionnaire item responses. Left: EAT item 2, 'I avoid eating when I am hungry,' from Rouault et al. (2018), showing a positive correlation affected by high-rating outliers in the 'Usually' and 'Always' response category. Right: STAI item 13, 'I feel secure,' from Seow & Gillan (2020), demonstrating a negative correlation influenced by acquiescence to reversed items. Error bars represent standard errors of the mean. Questionnaires: Alcohol - Alcohol Use Disorder Identification Test (AUDIT; Saunders et al., 1993); Apathy - Apathy Evaluation Scale (AES; Marin et al., 1991); Depression - the Self-Rating Depression Scale (SDS; Zung, 1965); EAT - the Eating Attitudes Test (EAT-26; Garner et al., 1982); Impulsivity- the Barratt Impulsivity Scale (BIS-11; Patton et al., 1995); OCD - the Obsessive-Compulsive Inventory – Revised (OCI-R; Foa et al., 2002); Social anxiety- Liebowitz Social Anxiety Scale (LSAS; Liebowitz, 1987); STAI-anxiety - the State-Trait Anxiety Inventory (STAI; Spielberger, 1970); GAD-anxiety-Generalized Anxiety Disorder 7-item scale (GAD-7; Spitzer, Kroenke, Williams, & Löwe, 2006)."}
+```{r skewness-confidence, echo=FALSE, fig.cap="Correlation between item-level skewness and item-confidence correlation. Top panel: each point represents an item from the self-report questionnaires, with the shapes indicating different questionnaires. The x-axis represents the skewness score of each item, which was limited to a range of 0-6 for an easier visualization. The y-axis represents the Pearson correlation coefficient between the item's rating and mean confidence, across individuals. The black line represents a linear regression fit, and the shaded gray area represents the standard error of the fit. Bottom Panel: mean confidence ratings by questionnaire item responses. Left: EAT item 2, 'I avoid eating when I am hungry,' from Rouault et al. (2018), showing a positive correlation affected by high-rating outliers in the 'Usually' and 'Always' response category. Right: SDS item 2, "Morning is when I feel the best,” from Seow & Gillan (2020), demonstrating a negative correlation influenced by acquiescence to reversed items. Error bars represent standard errors of the mean. Questionnaires: Alcohol - Alcohol Use Disorder Identification Test (AUDIT; Saunders et al., 1993); Apathy - Apathy Evaluation Scale (AES; Marin et al., 1991); Depression - the Self-Rating Depression Scale (SDS; Zung, 1965); EAT - the Eating Attitudes Test (EAT-26; Garner et al., 1982); Impulsivity- the Barratt Impulsivity Scale (BIS-11; Patton et al., 1995); OCD - the Obsessive-Compulsive Inventory – Revised (OCI-R; Foa et al., 2002); Social anxiety- Liebowitz Social Anxiety Scale (LSAS; Liebowitz, 1987); STAI-anxiety - the State-Trait Anxiety Inventory (STAI; Spielberger, 1970); GAD-anxiety-Generalized Anxiety Disorder 7-item scale (GAD-7; Spitzer, Kroenke, Williams, & Löwe, 2006)."}
 
 knitr::include_graphics("../figures/skewness_confidence_relationship_three_df.png")
 ```
@@ -2491,7 +2494,7 @@ knitr::include_graphics("../figures/inattentive_acq_fig.png")
 
 Decades of psychological research have identified limitations in the use of self-reports to measure psychological traits and mental health [@bagozzi1990; @baumgartner2001; @campbell; @chandler2020; @curran2016; @greenleaf1992; @huang2012; @meade2012; @nichols1989; @ophir2020; @podsakoff2003; @spector1987; @weijters2013], devising partial solutions and practical best-practice recommendations [see @huang2015; @weijters2013]. This accumulated wisdom has been largely left behind with the recent transition to massive-scale online testing, and the reliance on multiple questionnaires as a basis for the extraction of transdiagnostic psychiatric dispositions. Recently, concerns about the use of self-reports have resurfaced in the context of online testing [@chandler2020; @ophir2020], with evidence that inattentive responding leads to spurious negative correlations between the endorsement of rare items and task performance [@zorowitz2023]. Our findings expand on and amplify these concerns. They show that biases common in responses to self-report inventories generalize to confidence ratings -- a form of self-reports in themselves -- thus giving rise to spurious correlations between psychiatric dimensions and metacognitive biases.
 
-We believe that the finding of a positive correlation between compulsivity and decision confidence may be an important example of this effect. This finding, which has been obtained repeatedly in large-scale online studies, appears inconsistent with the clinical presentation of OCD as a "doubt disease" [@berrios1989; @janet1903] and with the negative association between OCD symptoms and decision confidence observed in lab-based experiments. Importantly, this negative association was found both in individuals with high OCD tendencies [@lazarov2012; @seow2020; @zhang2017; @hoven2023] and in clinical OCD samples [@cougle2007; @foa1997; @hermans2008; @karadag2005; @mcnally1993; @moritz2007; see @dar2022 and @hoven2019 for a review], even when controlling for anxiety and depression [@dar2004; @dar2000; @tolin2001]. A direct comparison between participants with clinical OCD and compulsive individuals (measured using the OCI-R) within the same study found opposing trends: over-confidence among highly compulsive individuals and under-confidence in OCD participants, leaving this discrepancy unresolved (@hoven2023). Notwithstanding the differences between the CIT factor, obsessive-compulsive tendencies and clinical OCD, it is hard to think of a theoretical account that would explain the observed sign flip of the correlations of confidence ratings with the different measures.
+We believe that the finding of a positive correlation between compulsivity and decision confidence may be an important example of this effect. This finding, which has been obtained repeatedly in large-scale online studies, appears inconsistent with the clinical presentation of OCD as a "doubt disease" [@berrios1989; @janet1903] and with the negative association between OCD symptoms and decision confidence observed in lab-based experiments. Importantly, this negative association was found both in individuals with high OCD tendencies [@lazarov2012; @zhang2017] and in clinical OCD samples [@cougle2007; @foa1997; @hermans2008; @karadag2005; @mcnally1993; @moritz2007; see @dar2022 and @hoven2019 for a review], even when controlling for anxiety and depression [@dar2004; @dar2000; @tolin2001]. A direct comparison between participants with clinical OCD and compulsive individuals (measured using the OCI-R) within the same study found opposing trends: over-confidence among highly compulsive individuals and under-confidence in OCD participants, leaving this discrepancy unresolved (@hoven2023). Notwithstanding the differences between the CIT factor, obsessive-compulsive tendencies and clinical OCD, it is hard to think of a theoretical account that would explain the observed sign flip of the correlations of confidence ratings with the different measures.
 
 Our findings suggest that this observed reversal is not due to substantive psychological differences between the three constructs but instead is accounted for by surface level questionnaire-filling behaviours. We show that a transdiagnostic dimension of compulsivity and intrusive thought partially captures surface-level behaviours, which may drive the positive correlation between this dimension and decision confidence. We suggest that previously reported positive correlations between decision confidence and compulsivity are likely to reflect the higher prevalence of inattentive responders (which are, as we show, also highly confident) in online samples.
 
