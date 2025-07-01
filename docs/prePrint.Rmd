@@ -177,7 +177,7 @@ We start by reporting the reanalysis of three large-scale online metacognition s
 
 ```{r tasks, echo=FALSE, fig.cap="Illustration of perceptual decision-making tasks re-analyzed in this report. Left: in the dot comparison task used by Rouault et al. (2018) and Hoven et al. (2023), participants decided which of two squares contains more dots and then rated their decision confidence on a 6-point verbal scale or 50-point probabilistic  scale (respectively). Right: in the predictive inference task used by Seow and Gillan (2020), participants positioned a bucket (yellow arc on the circle edge) to catch a flying particle and then rated their confidence in that they would catch the particle on a 100-point sliding scale."}
 
-knitr::include_graphics("../figures/tasks_three_df.png")
+knitr::include_graphics("../figures/task_structure.png")
 ```
 
 ```{r, reversed_items, include = FALSE}
@@ -1451,16 +1451,12 @@ demographic_df <- read.csv("../data/demographic_df_cleaned.csv", stringsAsFactor
 
 tidy_df <- raw_df %>% filter(trial_type=='countDots') %>% select(subj_id, trial_index, block, RT, correct, confidence, confidence_RT, increment, right_array, left_array, response)
 
-#count trials - sanity check  
-#trials_df <-
-#tidy_df %>% group_by(block, subj_id) %>% summarise(n=n())
-
 total_n <-tidy_df %>% 
   select(subj_id) %>% 
   distinct() %>% 
   nrow()
 
-# prolific id vector from task data
+# subj id vector from task data
 subj_ids <- tidy_df %>%
   select(subj_id) %>%
   distinct() %>%
@@ -1472,8 +1468,7 @@ subj_id_from_prolific <- demographic_df %>%
   distinct() %>%
   dplyr::pull(subj_id)
 
-# mean accuracy and confidence for correct/incorrect responses 
-
+# mean accuracy 
 acc_df <- 
   tidy_df %>% 
   filter(block != 'practice_with_feedback' & block != 'practice_without_feedback') %>% 
@@ -1487,13 +1482,11 @@ excluded <- c(excluded_for_accuracy)
 
 tidy_df <- tidy_df %>% filter(!(subj_id %in% excluded))
 
-
 # N after exclusion 
 total_n_after_exclusion <-tidy_df %>% 
   select(subj_id) %>% 
   distinct() %>% 
   nrow()
-
 
 # construct mean confidence per participant df 
 mean_conf_df <- tidy_df %>% 
@@ -1503,18 +1496,7 @@ mean_conf_df <- tidy_df %>%
 
 
 # qualtrics data  ---------------------------------------------------------
-
 qualtrics_df <- qualtrics_df_raw %>% filter(subj_id != 'test')
-
-# Remove the second row which contain internal qualtrics information 
-# raw_prolific_data <- qualtrics_df %>%
-#   slice(-2) 
- 
-# Extract the first row as content descriptions
-#content_descriptions <- raw_prolific_data[1, ]
-
-# Extract the first row as content descriptions and clean the content descriptions by removing the instruction part
-#cleaned_content_descriptions <- sub(".* - ", "", as.character(raw_prolific_data[1, ]))
 
 # Item names and instructions 
 item_instructions <- data.frame(
@@ -1522,7 +1504,6 @@ item_instructions <- data.frame(
   item_name = colnames(qualtrics_df_raw)
 ) %>%
   filter(str_detect(item_name, "OCI.R_") | 
-           str_detect(item_name, "DASS_anx_") | 
            str_detect(item_name, "zung_") | 
            str_detect(item_name, "neutral_")) %>%
   filter(!str_detect(item_name, "Click")) %>%
@@ -1531,14 +1512,14 @@ item_instructions <- data.frame(
 
 self_long <- 
   qualtrics_df %>% 
-  select(subj_id, matches("OCI.R_"), matches("DASS_anx_"), matches("zung_"), matches("neutral_")) %>%
-  select(-contains("Click")) %>% # Self report columns with randomization and RT for block 
+  select(subj_id, matches("OCI.R_"), matches("zung_"), matches("neutral_")) %>%
+  select(-contains("Click")) %>% # Self report columns with randomization and RT for block
   select(subj_id, all_of(item_instructions$item_name)) %>%
   pivot_longer(cols = -subj_id, names_to = "item_name", values_to = "item_value")%>% 
   left_join(., item_instructions, by='item_name')%>% # add item content 
   filter(!(subj_id %in% excluded))
 
-# Infrequncy df 
+# Infrequency df 
 inf_df <- self_long %>%
   filter(str_detect(item_name, "inf")) %>% # Add a new column to indicate whether the answer failed the attention check
   mutate(attention_check_failed = case_when(
@@ -1548,7 +1529,10 @@ inf_df <- self_long %>%
     item_name == "zung_inf_2" & item_value != "1" ~ TRUE,
     TRUE ~ FALSE
   )) %>%
-  mutate(fail_indicator = as.integer(attention_check_failed))
+  mutate(fail_indicator = as.integer(attention_check_failed)) %>%
+  # add mean confidence to infrequency df
+  left_join(mean_conf_df %>% select(subj_id, mean_conf),
+            by = "subj_id")
 
 item_failures <- inf_df %>%
   select(subj_id, item_name, fail_indicator) %>%
@@ -1583,7 +1567,6 @@ failed_attention_gender_df <- data.frame(
   ) %>%
   mutate(failed_attention = ifelse(failed_attention, 'Inattentive', 'Attentive'))
 
-
 count_gender_in_attention <- failed_attention_gender_df %>% 
   group_by(failed_attention, Sex) %>% 
   summarise(n=n())
@@ -1610,7 +1593,7 @@ chi_sqaure__sample_size <- sum(attention_gender_table)
 apa_result_chi_sqaure <- apa_print(chisq_result, n = chi_sqaure__sample_size)
 attention_gender_table <- as.data.frame(attention_gender_table)
 
-# attentive vs. inattentive 
+# Sex: attentive vs. inattentive 
 inattentive_sex_fig<-
 failed_attention_gender_df %>%
   filter(!(subj_id %in% excluded_for_accuracy)) %>% 
@@ -1641,16 +1624,16 @@ gender_confidence_d <- cohens_d(
   data = failed_attention_gender_df
 )
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-# add failed attention 
+# add failed attention and accuracy 
 mean_conf_df <- mean_conf_df %>%
   mutate(
     subj_id = as.character(subj_id),  # Ensure subj_id is character
     failed_attention = ifelse(subj_id %in% as.character(failed_attention), 'Inattentive', 'Attentive') 
   ) %>%
-  left_join(acc_df, by = "subj_id")
+  left_join(acc_df, by = "subj_id") %>%
+  mutate(failed_attention = factor(failed_attention, levels = c("Attentive", "Inattentive")))
 
 inattentive_confidence_fig <- 
   mean_conf_df %>% 
@@ -1687,17 +1670,15 @@ t.test(mean_conf ~ failed_attention, data = inattentive_t_test_df, alternative =
 neutral_items <- c('neutral_1', 'neutral_2', 'neutral_3', 'neutral_4', 'neutral_5', 'neutral_6', 'neutral_7', 'neutral_8', 
                    'neutral_9', 'neutral_10', 'neutral_11', 'neutral_12', 'neutral_13', 'neutral_14')
 
-rating_bias_df <- self_long %>% filter(item_name %in% neutral_items) %>% group_by(subj_id) %>% 
-  summarise(mean_rating = mean(as.numeric(item_value)))
-
 # add mean rating to mean conf df 
-mean_conf_df <- mean_conf_df %>% left_join(., rating_bias_df)
-
-# correlation of mean rating and mean confidence 
-mean_conf_df$failed_attention <- factor(mean_conf_df$failed_attention, 
-                                        levels = c("Attentive", "Inattentive"))
-
-#ggsave("./figures/neutral_confidence_fig.png", plot = neutral_items_confidence_fig, width = 8, height = 8, dpi = 300)
+mean_conf_df <- mean_conf_df %>% 
+  left_join(
+    self_long %>% 
+      filter(item_name %in% neutral_items) %>% 
+      group_by(subj_id) %>% 
+      summarise(mean_rating = mean(as.numeric(item_value))),
+    by = "subj_id"
+  )
 
 exp.h2.spearman_test <- mean_conf_df %>%
     with(cor.test(mean_rating, mean_conf, method = "spearman"))
@@ -1705,108 +1686,64 @@ exp.h2.spearman_test <- mean_conf_df %>%
 exp.h2.pearson_test <- mean_conf_df %>%
   with(cor.test(mean_rating, mean_conf, method = "pearson"))
 
-
-#ggsave("./figures/figure_6_top.png", plot = figure_6_top, width = 8, height = 4, dpi = 400) 
-
-# acquiescence in inattentive responding 
-
-inattentive_acquies <- 
-  mean_conf_df %>% 
-  ggplot(aes(x = failed_attention, y = mean_rating, group = failed_attention, color = failed_attention)) +
-  geom_jitter(width = 0.25, alpha = 0.6, size = 3) +
-  stat_summary(fun = mean, geom = "point", shape = 21, size = 4, color = "black") +
-  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2, color = "black") +
-  labs(x = "", y = "Mean Rating", color = "") +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  theme_minimal() +
-  theme(legend.position = "none")+
-  theme(text = element_text(size = 16)) 
-  #coord_cartesian(ylim = c(0, 1))
-
-# t.test
-inattentive_acquies_t_test <- mean_conf_df %>%
-  select(failed_attention, mean_rating) %>%
-  mutate(failed_attention = factor(failed_attention), # Convert to factor
-         failed_attention = relevel(failed_attention, ref = "Inattentive")) %>% 
-  t.test(mean_rating ~ failed_attention, data = ., alternative = 'greater')
-
 # OCI ---------------------------------------------------------------------------------------
 
-# add oci total (sum of all OCI items) to mean_conf_df 
-mean_conf_df <- mean_conf_df %>%
-  left_join(
-    self_long %>%
-      filter(str_detect(item_name, "^OCI.R_")) %>% #select all OCI items 
-      filter(item_name != 'OCI.R_inf_1' & item_name != 'OCI.R_inf_2') %>% #remove OCI inf items 
-      group_by(subj_id) %>%
-      summarise(total_oci = sum(as.numeric(item_value), na.rm = TRUE)) %>%
-      rename(subj_id = subj_id),
-    by = "subj_id"
+# NOTE: item_corrected is **only** calculated for attentive participants
+# Inattentive participants have NA values by design! 
+oci_processing <- self_long %>%
+  filter(str_detect(item_name, "^OCI.R_")) %>% 
+  filter(item_name != 'OCI.R_inf_1' & item_name != 'OCI.R_inf_2') %>% 
+  mutate(item_value = as.numeric(item_value)) %>% 
+  left_join(mean_conf_df %>% select(subj_id, mean_rating, failed_attention), by = "subj_id") %>%
+  group_by(item_name) %>% 
+  mutate(
+    item_corrected = case_when(
+      failed_attention == "Attentive" ~ {
+        # Fit model using only attentive participants for this item
+        attentive_data <- cur_data() %>% filter(failed_attention == "Attentive")
+        model <- lm(item_value ~ mean_rating, data = attentive_data)
+        
+        # Get residuals and map them back
+        residuals_vec <- as.numeric(residuals(model))
+        residuals_vec[match(subj_id, attentive_data$subj_id)]
+      },
+      TRUE ~ NA_real_
+    )
+  ) %>%
+  ungroup()
+
+
+# Calculate both original and corrected totals
+oci_totals <- oci_processing %>%
+  group_by(subj_id) %>%
+  summarise(
+    total_oci = sum(item_value, na.rm = TRUE), # Original total OCI score
+    total_oci_corrected = sum(item_corrected, na.rm = TRUE), # Corrected total OCI score
+    failed_attention = first(failed_attention), # Keep attention status
+    .groups = "drop"
+  ) %>%
+  mutate(
+    # Scale corrected scores to the same range as original scores
+    total_oci_corrected_scaled = if_else(
+      failed_attention == "Attentive", # only scale for attentive participants
+      {
+        min_corrected <- min(total_oci_corrected[failed_attention == "Attentive"], na.rm = TRUE)
+        max_corrected <- max(total_oci_corrected[failed_attention == "Attentive"], na.rm = TRUE)
+        (total_oci_corrected - min_corrected) / (max_corrected - min_corrected) * 
+          max(total_oci, na.rm = TRUE)
+      }, 
+      NA_real_ # leave NA for inattentive participants 
+    )
   )
 
-# Correlation between OCI with mean confidence after controlling for acquiescence --------------------------------------------------
-oci_items_df <- self_long %>% filter(str_starts(item_name, 'OCI.R')) %>% 
-  filter(item_name != 'OCI.R_inf_1' & item_name != 'OCI.R_inf_2') 
+# Add oci totals to mean_conf_df
+mean_conf_df <- mean_conf_df %>%
+  left_join(oci_totals %>% select(subj_id, total_oci, total_oci_corrected_scaled), by = "subj_id")
 
-#add mean rating 
-oci_items_df <- oci_items_df %>%
-  left_join(., mean_conf_df %>% select(subj_id, mean_rating), by = c("subj_id" = "subj_id"))
-
-# Convert item_value to numeric
-oci_items_df$item_value <- as.numeric(oci_items_df$item_value)
-
+# Correlation
 oci_acq_correlation <- cor.test(mean_conf_df$total_oci, mean_conf_df$mean_rating, method = "pearson")
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Correcting items value residual approach  
-# Fit linear models and get residuals
-
-# Initialize a list to store results
-results <- list()
-
-# get unique item names
-items <- unique(oci_items_df$item_name)
-
-# Loop over each item and fit a linear model
-for (item in items) {
-  # Subset data for the current item
-  item_data <- oci_items_df %>% filter(item_name == item)
-  
-  # Fit  linear model
-  model <- lm(item_value ~ mean_rating, data = item_data)
-  
-  # Extract residuals
-  item_data$item_corrected <- residuals(model)
-  
-  # Store the modified data
-  results[[item]] <- item_data
-}
-
-# Combine the results into a single dataframe
-oci_items_df_corrected <- bind_rows(results)
-
-# create new total corrected oci df 
-oci_df_corrected <- oci_items_df_corrected %>% 
-  group_by(subj_id) %>% 
-  summarise(total_oci_corrected = sum(item_corrected))
-
-# Scale oci_corrected to range 0-62
-min_val <- min(oci_df_corrected$total_oci_corrected)
-max_val <- max(oci_df_corrected$total_oci_corrected)
-
-oci_df_corrected <- oci_df_corrected %>%
-  mutate(total_oci_corrected_scaled = (total_oci_corrected - min_val) / (max_val - min_val) * 62)
-
-# Join scaled scores to mean_conf_df
-mean_conf_df <- mean_conf_df %>%
-  left_join(oci_df_corrected %>%
-              rename(subj_id = subj_id) %>% 
-              select(subj_id, total_oci_corrected_scaled),
-            by = 'subj_id')
-
-# Plot OCI and confidence 
-
-# plot oci with confidence with color coding for infrequncy fails 
+# plot oci with confidence with color coding for infrequency fails 
 oci_confidence_no_screening<-
   mean_conf_df %>%
   ggplot(aes(x = total_oci, y = mean_conf, color = failed_attention)) +
@@ -1821,7 +1758,7 @@ oci_confidence_no_screening<-
   scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
   labs(x = 'Total OCI-R Score', y = 'Mean Confidence', color='')
 
-#filer out inattentive 
+#filter out inattentive 
 oci_confidence_filter_inattentive <-
   mean_conf_df %>%
   filter(failed_attention =='Attentive') %>% 
@@ -1834,7 +1771,6 @@ oci_confidence_filter_inattentive <-
   theme_minimal() +
   theme_minimal(base_size = 16)+
   labs(x = 'Total OCI-R Score', y = '', color='')
-
 
 # oci-confidence correlation stats 
 oci_confidence_cor <-
@@ -1853,7 +1789,6 @@ oci_confidence_filter_inattentive_acq_cor <- mean_conf_df %>%
   with(cor.test(total_oci_corrected_scaled, mean_conf, method = 'pearson'))
 
 oci_confidence_filter_inattentive_acq_cor_coef<- oci_confidence_filter_inattentive_acq_cor$estimate
-
 
 #inattentive participants OCI scores 
 oci_inattention_t.test <- 
@@ -1878,12 +1813,13 @@ inattentive_oci_fig <-
   theme(text = element_text(size = 16))  
   #coord_cartesian(ylim = c(0, 1))
 
-# oci scores correlations with acquiescence across participants 
-cor.test(mean_conf_df$total_oci, mean_conf_df$mean_rating, method = 'pearson')
-
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # compute ocir skewness for each item 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+oci_items_df <- self_long %>% filter(str_starts(item_name, 'OCI.R')) %>% 
+  filter(item_name != 'OCI.R_inf_1' & item_name != 'OCI.R_inf_2') %>% 
+  mutate(item_value = as.numeric(item_value))
 
 # Create empty list to store results
 oci_skewness_results_list <- list()
@@ -1916,164 +1852,93 @@ ocir_mean_skew <- mean(oci_skewness_results_df$skewness)
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # Correlation between SDS with mean confidence after controlling for acquiescence------------
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-sds_items_df <- self_long %>% filter(str_starts(item_name, 'zung_')) %>% 
-  filter(item_name != 'zung_inf_1' & item_name != 'zung_inf_2') 
-
-# reverse coding items 
-
+# SDS reversed items 
 sds_reversed_items <- c("zung_2", "zung_5", "zung_6", "zung_11", "zung_12", "zung_14", "zung_16", "zung_17", "zung_18", "zung_20")
 
-# Convert item_value to numeric
-sds_items_df$item_value <- as.numeric(sds_items_df$item_value)
+# SDS processing (following OCI pattern)
+sds_processing <- self_long %>%
+  filter(str_detect(item_name, "^zung_")) %>% # find all SDS items 
+  filter(item_name != 'zung_inf_1' & item_name != 'zung_inf_2') %>% # remove inf items 
+  mutate(item_value = as.numeric(item_value)) %>% # convert item_value to numeric
+  # Apply reverse scoring
+  mutate(item_value = if_else(
+    item_name %in% sds_reversed_items,
+    reverse_scores(item_value),
+    item_value
+  )) %>%
+  # Add reversed label
+  mutate(reversed = if_else(item_name %in% sds_reversed_items, "reversed", "standard")) %>%
+  left_join(mean_conf_df %>% select(subj_id, mean_rating, failed_attention), by = "subj_id") %>% # add mean rating and attention status
+  group_by(item_name) %>% # for each item 
+  mutate(
+    item_corrected = case_when(
+      failed_attention == "Attentive" ~ {
+        # Fit model using only attentive participants for this item
+        attentive_data <- cur_data() %>% filter(failed_attention == "Attentive")
+        model <- lm(item_value ~ mean_rating, data = attentive_data)
+        
+        # Get residuals and map them back
+        residuals_vec <- as.numeric(residuals(model))
+        residuals_vec[match(subj_id, attentive_data$subj_id)]
+      },
+      TRUE ~ NA_real_
+    )
+  ) %>%
+  ungroup()
 
-# Apply reverse scoring
-sds_items_df <- sds_items_df %>%
-  mutate(item_original_value = item_value, 
-    item_value = ifelse(item_name %in% sds_reversed_items, 
-                        reverse_scores(item_value), 
-                        item_value))
-
-#add mean rating 
-sds_items_df <- sds_items_df %>%
-  left_join(., mean_conf_df %>% select(subj_id, mean_rating, mean_conf), by = c("subj_id" = "subj_id")) %>% # add reversed label 
-  mutate(reversed = ifelse(item_name %in% sds_reversed_items, "reversed", "standard"))
-
-sds_item_correlations <- sds_items_df %>%
-  group_by(item_name, item_content, reversed) %>%
+# Calculate both original and corrected totals
+sds_totals <- sds_processing %>%
+  group_by(subj_id) %>%
   summarise(
-    confidence_correlation = cor(item_value, mean_conf),
-    .groups = 'drop'
+    total_sds = sum(item_value, na.rm = TRUE), # Original total SDS score
+    total_sds_positive = sum(item_value[reversed == "standard"], na.rm = TRUE), # Positive items
+    total_sds_negative = sum(item_value[reversed == "reversed"], na.rm = TRUE), # Negative items
+    total_sds_corrected = sum(item_corrected, na.rm = TRUE), # Corrected total SDS score
+    failed_attention = first(failed_attention), # Keep attention status
+    .groups = "drop"
+  ) %>%
+  mutate(
+    # Scale corrected scores to the same range as original scores
+    total_sds_corrected_scaled = if_else(
+      failed_attention == "Attentive", # only scale for attentive participants
+      {
+        min_corrected <- min(total_sds_corrected[failed_attention == "Attentive"], na.rm = TRUE)
+        max_corrected <- max(total_sds_corrected[failed_attention == "Attentive"], na.rm = TRUE)
+        (total_sds_corrected - min_corrected) / (max_corrected - min_corrected) * 
+          max(total_sds, na.rm = TRUE)
+      }, 
+      NA_real_ # leave NA for inattentive participants 
+    )
   )
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-# Correcting items value residual approach  
-# Fit linear models and get residuals
-
-# Initialize a list to store results
-sds_results <- list()
-
-# get unique item names
-sds_items <- unique(sds_items_df$item_name)
-
-# Loop over each item and fit a linear model
-for (item in sds_items) {
-  # Subset data for the current item
-  item_data <- sds_items_df %>% filter(item_name == item)
-  
-  # Fit  linear model
-  model <- lm(item_value ~ mean_rating, data = item_data)
-  
-  # Extract residuals
-  item_data$item_corrected <- residuals(model)
-  
-  # Store the modified data
-  sds_results[[item]] <- item_data
-}
-
-# add results to df 
-sds_items_df$item_corrected <- bind_rows(sds_results)$item_corrected
-
-# total sds score 
-sds_df_total <- sds_items_df %>% 
-  group_by(subj_id) %>% 
-  summarise(
-    total_sds_corrected = sum(item_corrected),
-    total_sds = sum(item_value),
-    total_sds_rating_space = sum(item_original_value),
-    total_sds_positive = sum(item_value[reversed == "standard"]),
-    total_sds_negative = sum(item_value[reversed == "reversed"]),
-    total_sds_positive_corrected = sum(item_corrected[reversed == "standard"]),
-    total_sds_negative_corrected = sum(item_corrected[reversed == "reversed"])
-  ) %>% 
-  left_join(
-    mean_conf_df %>% 
-      rename(subj_id = subj_id) %>%
-      dplyr::select(subj_id, failed_attention, mean_conf, mean_rating),
-    by = "subj_id"
-  ) %>% # scaling the corrected scale to the same scale as the original sds scale
-  mutate(total_sds_corrected_scaled = (total_sds_corrected - min(total_sds_corrected)) / 
-         (max(total_sds_corrected) - min(total_sds_corrected)) * 
-         (max(total_sds) - min(total_sds)) + min(total_sds))
+# Add SDS totals to mean_conf_df
+mean_conf_df <- mean_conf_df %>%
+  left_join(sds_totals %>% select(subj_id, total_sds, total_sds_positive, total_sds_negative, total_sds_corrected_scaled), by = "subj_id")
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-# plot sds correlation with confidence 
-sds_confidence_no_screening <-
-  sds_df_total %>%
-  ggplot(aes(x = total_sds, y = mean_conf, color = failed_attention)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                   label.y = 0.9, label.x = 20, size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  labs(x = 'Total SDS Score', y = 'Mean Confidence', color = '')+
-  coord_cartesian(xlim = c(20, 70))
-
-# Second plot - Only attentive participants, using raw scores
-sds_confidence_filter_inattentive <-
-  sds_df_total %>%
-  filter(failed_attention == 'Attentive') %>% 
-  ggplot(aes(x = total_sds, y = mean_conf)) +
-  geom_point(size = 3, alpha = 0.8, color = '#3399ff') +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                   label.y = 0.9, label.x = 20, size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  labs(x = 'Total SDS Score', y = '', color = '')+
-  coord_cartesian(xlim = c(20, 70))
-
-# Third plot - Only attentive participants, using corrected scores
-sds_confidence_filter_inattentive_and_acq <- 
-  sds_df_total %>%
-  filter(failed_attention == 'Attentive') %>% 
-  ggplot(aes(x = total_sds_corrected_scaled, y = mean_conf)) +
-  geom_point(size = 3, alpha = 0.8, color = '#3399ff') +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                   label.y = 0.9, label.x = 20, size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  labs(x = 'Total SDS Corrected', y = '', color = '')+
-  coord_cartesian(xlim = c(20, 70))
-
-figure_sds_plots <- ggpubr::ggarrange(
-  sds_confidence_no_screening + theme(legend.position = "none"),
-  sds_confidence_filter_inattentive + theme(legend.position = "none"),
-  sds_confidence_filter_inattentive_and_acq + theme(legend.position = "none"),
-  ncol = 3,
-  nrow = 1
-)
 
 # SDS-confidence correlation stats 
 sds_confidence_cor <-
-  cor.test(sds_df_total$total_sds, sds_df_total$mean_conf, method = 'pearson')
-
-sds_confidence_filter_inattentive_cor <- sds_df_total %>%
+  cor.test(mean_conf_df$total_sds, mean_conf_df$mean_conf, method = 'pearson')
+sds_confidence_filter_inattentive_cor <- mean_conf_df %>%
   filter(failed_attention == 'Attentive') %>%
   with(cor.test(total_sds, mean_conf, method = 'pearson'))
-
 sds_confidence_filter_inattentive_cor_coef <- sds_confidence_filter_inattentive_cor$estimate
-
-sds_confidence_filter_inattentive_acq_cor <- sds_df_total %>%
+sds_confidence_filter_inattentive_acq_cor <- mean_conf_df %>%
   filter(failed_attention == 'Attentive') %>%
   with(cor.test(total_sds_corrected_scaled, mean_conf, method = 'pearson'))
-
 sds_confidence_filter_inattentive_acq_cor_coef <- sds_confidence_filter_inattentive_acq_cor$estimate
-
 # SDS attentive vs. inattentive scores 
 sds_attentiveness_t.test <- 
-t.test(total_sds ~ failed_attention, data = sds_df_total, paired = FALSE)
-
+t.test(total_sds ~ failed_attention, data = mean_conf_df, paired = FALSE)
 #sds inattentive vs. attentive scores 
 sds_inattentiveness_desc <- 
-  sds_df_total %>%
+  mean_conf_df %>%
   group_by(failed_attention) %>%
   summarise(mean_sds = mean(total_sds), sd_sds = sd(total_sds), n = n())
 
 inattentive_sds_fig <- 
-  sds_df_total %>% 
+  mean_conf_df %>% 
   ggplot(aes(x = failed_attention, y = total_sds, group = failed_attention, color = failed_attention)) +
   geom_jitter(width = 0.25, alpha = 0.6, size = 3) +
   stat_summary(fun = mean, geom = "point", shape = 21, size = 4, color = "black") +
@@ -2087,125 +1952,21 @@ inattentive_sds_fig <-
 
 # SDS correlation with acquiescence 
 sds_acq_cor <- 
-cor.test(sds_df_total$total_sds, sds_df_total$mean_rating, method = 'pearson')
+cor.test(mean_conf_df$total_sds, mean_conf_df$mean_rating, method = 'pearson')
 
 # SDS positive and negative items correlation with acquiescence
 #positive items
 sds_positive_acq_cor <-
-cor.test(sds_df_total$total_sds_positive, sds_df_total$mean_rating, method = 'pearson')
+cor.test(mean_conf_df$total_sds_positive, mean_conf_df$mean_rating, method = 'pearson')
+
 #negative items
 sds_negative_acq_cor <-
-cor.test(sds_df_total$total_sds_negative, sds_df_total$mean_rating, method = 'pearson')
+cor.test(mean_conf_df$total_sds_negative, mean_conf_df$mean_rating, method = 'pearson')
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-sds_confidence_rating_space <- 
-sds_df_total %>%
-     ggplot(aes(x = total_sds_rating_space, y = mean_conf, color = failed_attention)) +
-    geom_point(size = 3, alpha = 0.8) +
-    geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-    ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                     label.y = 0.9, label.x = 20, size = 5, 
-                     aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-    theme_minimal(base_size = 16) +
-    scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-     labs(x = 'Total SDS Score', y = 'Mean Confidence', color = '')+
-     coord_cartesian(xlim = c(20, 70))
-
-sds_confidence_positive <- 
-  sds_df_total %>%
-  ggplot(aes(x = total_sds_positive, y = mean_conf, color = failed_attention)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                   label.y = 0.9, label.x = 20, size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  labs(x = 'Total SDS Score', y = 'Mean Confidence', color = '')
-
-
-sds_confidence_negative <- 
-  sds_df_total %>%
-  ggplot(aes(x = total_sds_negative, y = mean_conf, color = failed_attention)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                   label.y = 0.9, label.x = 20, size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  labs(x = 'Total SDS Score', y = 'Mean Confidence', color = '')
-
-sds_pos_neg <- sds_confidence_positive | sds_confidence_negative
-
-sds_confidence_positive_control_acq <- 
-  sds_df_total %>%
-  ggplot(aes(x = total_sds_positive_corrected, y = mean_conf, color = failed_attention)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                  size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  labs(title = 'Total SDS positive corrected for ACQ', x = 'Total SDS Score control for ACQ', y = 'Mean Confidence', color = '')
-
-sds_confidence_negative_control_acq <- 
-  sds_df_total %>%
-  ggplot(aes(x = total_sds_negative_corrected, y = mean_conf, color = failed_attention)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
-  ggpubr::stat_cor(method = "pearson", color = "black", show.legend = FALSE, 
-                  size = 5, 
-                   aes(label = paste0("italic(r) == ", ..r.., "*','~italic(p) == ", ..p..))) +
-  theme_minimal(base_size = 16) +
-  scale_color_manual(values = c("#3399ff", "#ffb3b3")) + 
-  labs(title = 'Total SDS negative corrected for ACQ', x = 'Total SDS Score control for ACQ', y = 'Mean Confidence', color = '')
-
-SDS_pos_neg_contorl_ACQ <- sds_confidence_positive_control_acq | sds_confidence_negative_control_acq
-
-#ggplot(data=sds_df_total, aes(x=total_sds_positive, y=total_sds_positive_corrected))+
-  #geom_point()+geom_smooth(method = 'lm') +ggpubr::stat_cor(method = 'pearson')
-
-
-sds_reversed_fig <- sds_item_correlations %>%
-  mutate(reversed = factor(reversed, levels = c("standard", "reversed"))) %>%
-  ggplot(aes(x = reversed, y = confidence_correlation)) + 
-  geom_abline(intercept = 0, slope = 0) +
-  geom_jitter(width = 0.1, height = 0, size = 3, alpha = 0.6, color = "#3399ff") + 
-  stat_summary(fun = mean,
-              geom = "point",
-              size = 3, 
-              alpha = 0.5,
-              color = "black") +
-  stat_summary(fun.data = mean_se,
-              geom = "errorbar",
-              width = 0.2,
-              color = "black") +
-  labs(x = "", y = "Item confidence correlation") +
-  scale_x_discrete(labels = c("standard" = "Standard", "reversed" = "Reversed")) +
-  coord_cartesian(ylim = c(-0.3, 0.3)) +
-  theme_bw() +
-  theme(
-    plot.title = element_text(size = 24),
-    axis.title = element_text(size = 24),
-    axis.text = element_text(size = 18)
-  )
-
-reversed_sds_ttest <- sds_item_correlations %>%
-  t.test(confidence_correlation ~ reversed, data = .)
-
-#correlation between positive/negative SDS and mean rating 
-
-sds_df_total %>% ggplot(aes(x=total_sds_positive, y= mean_rating))+
-                          geom_point()+geom_smooth(method = 'lm')+
-                          ggpubr::stat_cor(method = 'pearson')
-
-sds_df_total %>% ggplot(aes(x=total_sds_negative, y= mean_rating))+
-                          geom_point()+geom_smooth(method = 'lm')+
-                          ggpubr::stat_cor(method = 'pearson')
-
 # compute skewness for all SDS items 
+# Get unique SDS items from sds_processing
+sds_items <- unique(sds_processing$item_name)
 
 # Create empty list to store results
 sds_skewness_results_list <- list()
@@ -2213,7 +1974,7 @@ sds_skewness_results_list <- list()
 # Loop through each SDS item
 for(item in sds_items) {
  skew_value <- moments::skewness(
-   sds_items_df %>% 
+   sds_processing %>% 
    filter(item_name == item) %>% 
    select(item_value)
  )[[1]]  # Extract the numeric value from the named vector
@@ -2231,19 +1992,6 @@ sds_skewness_results_df <- do.call(rbind, sds_skewness_results_list)
 # Calculate mean skewness across all items
 sds_mean_skew <- mean(sds_skewness_results_df$skewness)
 
-# compare oci to sds mean skewness score 
-
-#  combined dataframe with a questionnaire identifier
-combined_skewness_df <- bind_rows(
-  oci_skewness_results_df %>% mutate(questionnaire = "OCI"),
-  sds_skewness_results_df %>% mutate(questionnaire = "SDS")
-)
-
-# t-test comparing skewness between questionnaires
-skewness_ttest_oci_sds <- t.test(
-  skewness ~ questionnaire, 
-  data = combined_skewness_df
-)
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 # Creating online experiment plot ------------------
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -2285,7 +2033,7 @@ neutral_items_oci_fig <-
   labs(x = 'Mean Neutral Rating', y = 'Total OCI-R score', color='')
 
 neutral_items_sds_fig <- 
-  sds_df_total %>%
+  mean_conf_df %>%
   ggplot(aes(x = mean_rating, y = total_sds, color = failed_attention)) +
   geom_point(size = 3, alpha = 0.6) +
   geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
@@ -2319,7 +2067,7 @@ confidence_oci_fig <-
   labs(x = 'Mean Confidence', y = 'Total OCI-R score', color='')
 
 confidence_sds_fig <- 
-  sds_df_total %>%
+  mean_conf_df %>%
   ggplot(aes(x = mean_conf, y = total_sds, color = failed_attention)) +
   geom_point(size = 3, alpha = 0.6) +
   geom_smooth(method = 'lm', color = "black", linetype = "dashed") +
@@ -2362,11 +2110,7 @@ inattentive_acq_fig <- (inattentive_acq_fig_first_row /
   plot_layout(heights = c(1, 0.1, 1, 0.1, 1)) + 
   plot_annotation(tag_levels = 'A')
 
-# ggsave("./figures/inattentive_acq_fig.png", 
-#        inattentive_acq_fig,
-#        width = 12,      
-#        height = 12,     
-#        dpi = 300)       
+#ggsave("../figures/inattentive_acq_fig.png", inattentive_acq_fig, width = 12,height = 12, dpi = 300)       
 
 
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -2439,7 +2183,6 @@ contorl_age_sex_df$Age <- as.numeric(contorl_age_sex_df$Age)
 conf_inatt_m <- lm(mean_conf ~ failed_attention + Sex + Age, data = contorl_age_sex_df)
 summary(conf_inatt_m)
 
-
 # Models predicting mean confidence from acquiescence
 conf_acq_m <- lm(mean_conf ~ mean_rating + Sex + Age, data = contorl_age_sex_df)
 summary(conf_acq_m)
@@ -2465,7 +2208,7 @@ oci_inattention_d <- cohens_d(
 # SDS attentive vs inattentive scores
 sds_attentiveness_d <- cohens_d(
   total_sds ~ failed_attention,
-  data = sds_df_total %>% 
+  data = mean_conf_df %>% 
     mutate(failed_attention = factor(failed_attention, 
                                     levels = c("Inattentive", "Attentive")))
 )
