@@ -44,3 +44,6 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 .DS_Store
+/data
+/docs/prePrint_files
+docs/prePrint.docx
